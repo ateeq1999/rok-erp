@@ -1,0 +1,19 @@
+[package]
+name = "rok-pos-pharmacy"
+description = "Every pharmacy screen, its queries, procedures and rules"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+gpui.workspace = true
+rok-pos-domain.workspace = true
+rok-pos-shell.workspace = true
+rok-ui.workspace = true
+
+[dev-dependencies]
+gpui = { workspace = true, features = ["test-support"] }
+
+[lints]
+workspace = true

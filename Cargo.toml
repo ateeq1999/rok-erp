@@ -1,14 +1,41 @@
-[package]
-name = "pharmacy"
+[workspace]
+resolver = "3"
+members = ["crates/*", "apps/*"]
+
+[workspace.package]
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+rust-version = "1.88"
+license = "MIT"
 
-[dependencies]
-rok-ui = { version = "0.7.0", features = ["router", "query"] }
+[workspace.dependencies]
 gpui = "0.2.2"
+rok-ui = { version = "0.7.0", features = ["full", "query", "router"] }
+rok-db = { version = "0.3", features = ["chrono", "uuid", "json", "serde", "testing"] }
+sqlx = { version = "0.8", default-features = false, features = ["rust_decimal"] }
+rust_decimal = "1"
+rok-pos-domain = { path = "crates/rok-pos-domain" }
+rok-pos-shell = { path = "crates/rok-pos-shell" }
+rok-pos-pharmacy = { path = "crates/rok-pos-pharmacy" }
+rok-ui-build = "0.7.0"
+uuid = { version = "1", features = ["v7"] }
+chrono = "0.4"
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+toml = "0.8"
 
-[dev-dependencies]
-gpui = { version = "0.2.2", features = ["test-support"] }
+# `clippy::pedantic` and `missing_docs` are the house style; CI denies warnings.
+[workspace.lints.rust]
+missing_docs = "warn"
+unsafe_code = "deny"
 
-[build-dependencies]
-rok-ui-build = { version = "0.7.0" }
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# The generated route tree and proc-macro output are not ours to annotate.
+module_name_repetitions = "allow"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "debuginfo"

@@ -1,0 +1,19 @@
+[package]
+name = "rok-pos-shell"
+description = "The app frame both apps share: theme, fonts, sidebar, top bar and text helpers"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+gpui.workspace = true
+rok-pos-domain.workspace = true
+rok-ui.workspace = true
+
+[dev-dependencies]
+gpui = { workspace = true, features = ["test-support"] }
+rust_decimal.workspace = true
+
+[lints]
+workspace = true

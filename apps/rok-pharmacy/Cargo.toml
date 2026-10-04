@@ -1,0 +1,20 @@
+[package]
+name = "rok-pharmacy"
+description = "The Afya Pharmacy desktop app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+gpui.workspace = true
+rok-pos-domain.workspace = true
+rok-pos-pharmacy.workspace = true
+rok-pos-shell.workspace = true
+rok-ui.workspace = true
+
+[build-dependencies]
+rok-ui-build.workspace = true
+
+[lints]
+workspace = true

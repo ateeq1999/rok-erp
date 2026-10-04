@@ -1,0 +1,4 @@
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]
+# 1.88 is rok-ui's minimum; the workspace builds with anything newer on stable.
