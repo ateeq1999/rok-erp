@@ -10,7 +10,7 @@ license = "MIT"
 
 [workspace.dependencies]
 gpui = "0.2.2"
-rok-ui = { version = "0.7.0", features = ["full", "query", "router"] }
+rok-ui = { version = "0.7.0", features = ["full", "query", "router", "db", "db-chrono", "db-uuid"] }
 rok-db = { version = "0.3", features = ["chrono", "uuid", "json", "serde", "testing"] }
 sqlx = { version = "0.8", default-features = false, features = ["rust_decimal"] }
 rust_decimal = "1"

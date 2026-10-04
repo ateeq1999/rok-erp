@@ -13,6 +13,26 @@ jobs:
   checks:
     name: fmt, clippy, docs and tests
     runs-on: ubuntu-latest
+
+    # The Phase 0 spikes read and write real PostgreSQL: money in a numeric
+    # column, and row level security seen from the non-owner role.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # The spikes skip without this, so it is set rather than left to chance.
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
+
     steps:
       - uses: actions/checkout@v4
 
@@ -29,7 +49,6 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      # Phase 0 has no queries yet. A PostgreSQL service arrives with the database phase.
       - name: fmt
         run: cargo fmt --all --check
 

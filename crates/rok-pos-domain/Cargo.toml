@@ -6,9 +6,25 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 
+[features]
+default = []
+# The `numeric(18,2)` plumbing. Off for the apps' rules, on for anything that
+# reads or writes a column, and on for tests through the self dev-dependency
+# below, so the round trip is checked on every run.
+postgres = ["dep:rok-db", "dep:sqlx"]
+
 [dependencies]
 rust_decimal.workspace = true
 thiserror.workspace = true
+rok-db = { workspace = true, optional = true }
+sqlx = { workspace = true, optional = true }
+
+[dev-dependencies]
+uuid.workspace = true
+# A crate cannot depend on itself, except as a dev-dependency, which is how the
+# `postgres` feature is on for tests and off for the rules.
+rok-pos-domain = { path = ".", features = ["postgres"] }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
 
 [lints]
 workspace = true

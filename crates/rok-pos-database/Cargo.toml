@@ -1,0 +1,21 @@
+[package]
+name = "rok-pos-database"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "PostgreSQL access for rok POS: business sessions, models and repositories"
+
+[dependencies]
+chrono.workspace = true
+rok-db.workspace = true
+rok-pos-domain.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+rust_decimal.workspace = true
+sqlx.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+
+[lints]
+workspace = true

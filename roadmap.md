@@ -21,14 +21,25 @@ step, in plan order, with the plan's own wording where it helps.
         decimals, expiry shortened to a month and year.
 - [x] `apps/rok-pharmacy`: `rok_ui::init`, embedded fonts, a `1440x900` window, the generated
       route tree, and every pharmacy route on a placeholder page.
-- [ ] Spikes, each a small test or example:
-  - [ ] `Money` round trip with `rok_db::impl_value!`.
-  - [ ] `in_business` with `with_tenant` and `set_config`, checked as the non-owner role.
-  - [ ] `query::provide(cx, PharmacyDatabase(db))` and a `use_query` that lists rows.
-  - [ ] One dosage label and one 80 mm receipt from `rok-pos-hardware`.
+- [x] Spikes, each a small test or example:
+  - [x] `Money` round trip with `rok_db::impl_value!`: `rok-pos-domain/src/money_postgres.rs`
+        holds the sqlx plumbing behind its `postgres` feature, because sqlx's traits are foreign
+        to the crate that owns the type; `tests/money_round_trip.rs` writes and reads
+        `numeric(18,2)`.
+  - [x] `in_business` with `with_tenant` and `set_config`, checked as the non-owner role:
+        `rok-pos-database/tests/tenant_isolation.rs` connects a second time as `rok_pos_app`,
+        which owns no tables and has no `BYPASSRLS`, and reads through `sqlx::query` as well as
+        `rok_db::raw`.
+  - [x] `query::provide(cx, PharmacyDatabase(db))` and a `use_query` that lists rows:
+        `rok-pos-pharmacy/tests/query_screen.rs` builds its own `Db` on `db::runtime()`, hands it
+        over with `db::set_connection`, lists rows through `query::use_query`, and refreshes after
+        `db::invalidate`.
+  - [x] One dosage label and one 80 mm receipt from `rok-pos-hardware`: `escpos.rs` builds the
+        bytes, `label.rs` puts a dosage label and a Code 128 batch barcode on them, and
+        `printer.rs` writes them to a file, standard output or memory.
 
-The spikes need `rok-db` and `rok-pos-hardware`, which are separate crates and come with their
-own phases. Until then CI has no PostgreSQL service; the first query adds it.
+CI now runs a PostgreSQL 17 service and sets `DATABASE_URL`, so the spikes run rather than skip.
+Without it they still skip rather than fail.
 
 ## Phase 1 — Database and module installer
 

@@ -181,18 +181,18 @@ The app connects as a role that does not own the tables and has no `bypassrls`. 
 
 1. Create the workspace from §0.2 with `rust-toolchain.toml`, workspace lints (`clippy::pedantic`, `missing_docs` on library crates), `rustfmt.toml` and CI (fmt, clippy, tests with a PostgreSQL service).
 2. `rok-pos-shell`:
-   - [ ] `theme.rs`: start from `ThemePreset::Rok`, with the pharmacy accent `#0F766E` (tint `#F0FDFA`, text on tint `#115E59`) as a business-type accent.
-   - [ ] `fonts.rs`: register Oxanium (numbers, codes) and Outfit (text) with `rok_ui::fonts::register_font_files`.
-   - [ ] `app_frame.rs`: `AppRoot` → `Sidebar` (groups and badges from `PharmacySidebar`) + `AppBar` top bar + router outlet.
-   - [ ] `money_text.rs`, `batch_code_text.rs`: Oxanium, thousands separators, TZS without decimals.
+   - [x] `theme.rs`: start from `ThemePreset::Rok`, with the pharmacy accent `#0F766E` (tint `#F0FDFA`, text on tint `#115E59`) as a business-type accent.
+   - [x] `fonts.rs`: register Oxanium (numbers, codes) and Outfit (text) with `rok_ui::fonts::register_font_files`.
+   - [x] `app_frame.rs`: `AppRoot` → `Sidebar` (groups and badges from `PharmacySidebar`) + `AppBar` top bar + router outlet.
+   - [x] `money_text.rs`, `batch_code_text.rs`: Oxanium, thousands separators, TZS without decimals.
 3. `apps/rok-pharmacy/src/main.rs`:
-   - [ ] `Application::new().with_assets(rok_ui::Assets)`, `rok_ui::init(cx)`, register fonts, open the back-office window.
-   - [ ] `Router` with all pharmacy routes pointing at placeholder pages: `/`, `/prescriptions`, `/prescriptions/:prescription_id/check`, `/patients/:patient_id`, `/refills`, `/medicines`, `/batches`, `/controlled-register`, `/order`, `/receive/:order_id`, `/recalls/:recall_id`, `/claims`, `/licences`, `/till`.
+   - [x] `Application::new().with_assets(rok_ui::Assets)`, `rok_ui::init(cx)`, register fonts, open the back-office window.
+   - [x] `Router` with all pharmacy routes pointing at placeholder pages: `/`, `/prescriptions`, `/prescriptions/:prescription_id/check`, `/patients/:patient_id`, `/refills`, `/medicines`, `/batches`, `/controlled-register`, `/order`, `/receive/:order_id`, `/recalls/:recall_id`, `/claims`, `/licences`, `/till`.
 4. Spikes, each a small test or example:
-   - [ ] `Money` round trip with `rok_db::impl_value!` (§0.7).
-   - [ ] `in_business` with `with_tenant` and `set_config`, checked as the non-owner role: another business's rows are invisible, even through `rok_db::raw`.
-   - [ ] `query::provide(cx, PharmacyDatabase(db))` and a `use_query` that lists rows on screen.
-   - [ ] Print one dosage label and one 80 mm receipt (ESC/POS) from `rok-pos-hardware`.
+   - [x] `Money` round trip with `rok_db::impl_value!` (§0.7).
+   - [x] `in_business` with `with_tenant` and `set_config`, checked as the non-owner role: another business's rows are invisible, even through `rok_db::raw`.
+   - [x] `query::provide(cx, PharmacyDatabase(db))` and a `use_query` that lists rows on screen.
+   - [x] Print one dosage label and one 80 mm receipt (ESC/POS) from `rok-pos-hardware`.
 
 **Done when:** the window opens with the pharmacy sidebar, every sidebar link changes the route, and the four spikes pass in CI.
 

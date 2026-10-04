@@ -14,6 +14,9 @@ rok-ui.workspace = true
 
 [dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }
+rok-db.workspace = true
+sqlx.workspace = true
+uuid.workspace = true
 
 [lints]
 workspace = true

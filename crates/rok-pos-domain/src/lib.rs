@@ -7,6 +7,8 @@
 
 pub mod error;
 pub mod money;
+#[cfg(feature = "postgres")]
+pub mod money_postgres;
 
 pub use error::DomainError;
 pub use money::Money;
