@@ -9,7 +9,7 @@ description = "PostgreSQL access for rok POS: business sessions, models and repo
 [dependencies]
 chrono.workspace = true
 rok-db.workspace = true
-rok-pos-domain.workspace = true
+rok-pos-domain = { workspace = true, features = ["postgres"] }
 rust_decimal.workspace = true
 serde.workspace = true
 serde_json.workspace = true

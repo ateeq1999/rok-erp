@@ -136,7 +136,8 @@ values
    'general_sale', 'room_temperature', 12, '{}', true),
   ('00000000-0000-7000-8000-000000000205', '00000000-0000-7000-8000-000000000001',
    '00000000-0000-7000-8000-000000000105', 'Human insulin', '100 IU/ml, 10 ml vial', 'injection', 'vial',
-   'prescription_only', 'refrigerated_two_to_eight', 12, '{}', true),
+   'prescription_only', 'refrigerated_two_to_eight', 12,
+   '{"Store at 2 to 8 degrees Celsius - do not freeze", "Inject subcutaneously as directed"}', true),
   ('00000000-0000-7000-8000-000000000206', '00000000-0000-7000-8000-000000000001',
    '00000000-0000-7000-8000-000000000106', 'Metformin', '500mg', 'tablet', 'box of 100',
    'prescription_only', 'room_temperature', 12, '{}', true),
@@ -148,7 +149,8 @@ values
    'prescription_only', 'room_temperature', 12, '{}', true),
   ('00000000-0000-7000-8000-000000000209', '00000000-0000-7000-8000-000000000001',
    '00000000-0000-7000-8000-000000000109', 'Tramadol', '50mg', 'capsule', 'box of 100',
-   'controlled', 'room_temperature', 12, '{}', true),
+   'controlled', 'room_temperature', 12,
+   '{"Controlled medicine - keep in the locked cabinet", "May cause drowsiness - do not drive"}', true),
   ('00000000-0000-7000-8000-000000000210', '00000000-0000-7000-8000-000000000001',
    '00000000-0000-7000-8000-000000000110', 'Cetirizine', '10mg', 'tablet', 'box of 100',
    'pharmacy_medicine', 'room_temperature', 12, '{}', false),
@@ -517,6 +519,40 @@ values
   ('00000000-0000-7000-8000-000000000915', '00000000-0000-7000-8000-000000000001',
    '00000000-0000-7000-8000-000000000810', null, 'Losartan 50mg tablets',
    '1 tablet each morning', 30, 0, null);
+
+-- ---------------------------------------------------------------------------
+-- The clinical check board for RX-2214 (Mzee Salim R., 68): all six checks,
+-- five passed and the warfarin + metronidazole interaction as an alert that
+-- has to reach the prescriber before the medicine does.
+-- ---------------------------------------------------------------------------
+
+insert into pharmacy.prescription_checks
+  (id, organization_id, prescription_id, check_key, result, details, checked_by_user_id)
+values
+  ('00000000-0000-7000-8000-000000000f01', '00000000-0000-7000-8000-000000000001',
+   '00000000-0000-7000-8000-000000000805', 'identity', 'passed',
+   'Name and phone match the patient record. Age 68 confirmed with the patient.',
+   '00000000-0000-7000-8000-000000000011'),
+  ('00000000-0000-7000-8000-000000000f02', '00000000-0000-7000-8000-000000000001',
+   '00000000-0000-7000-8000-000000000805', 'allergy', 'passed',
+   'None known. Asked the patient again today.',
+   '00000000-0000-7000-8000-000000000011'),
+  ('00000000-0000-7000-8000-000000000f03', '00000000-0000-7000-8000-000000000001',
+   '00000000-0000-7000-8000-000000000805', 'interaction', 'warning',
+   'Warfarin + metronidazole. Metronidazole may increase the effect of warfarin and the risk of bleeding. Contact the prescriber before dispensing, or agree extra INR monitoring.',
+   '00000000-0000-7000-8000-000000000011'),
+  ('00000000-0000-7000-8000-000000000f04', '00000000-0000-7000-8000-000000000001',
+   '00000000-0000-7000-8000-000000000805', 'duplicate_therapy', 'passed',
+   'No other antibiotic on file in the last 30 days.',
+   '00000000-0000-7000-8000-000000000011'),
+  ('00000000-0000-7000-8000-000000000f05', '00000000-0000-7000-8000-000000000001',
+   '00000000-0000-7000-8000-000000000805', 'dose_range', 'passed',
+   'Both doses are within the usual label range for adults.',
+   '00000000-0000-7000-8000-000000000011'),
+  ('00000000-0000-7000-8000-000000000f06', '00000000-0000-7000-8000-000000000001',
+   '00000000-0000-7000-8000-000000000805', 'insurance_cover', 'passed',
+   'National health insurance - member active - both items on the formulary.',
+   '00000000-0000-7000-8000-000000000011');
 
 -- ---------------------------------------------------------------------------
 -- Insurance: the September batch the board shows (214 claims, 4,862,300,

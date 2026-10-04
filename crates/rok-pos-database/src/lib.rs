@@ -18,6 +18,7 @@
 //! ```
 
 pub mod business_session;
+pub mod models;
 pub mod module_installer;
 
 pub use business_session::{BusinessSession, in_business};
