@@ -751,7 +751,12 @@ fn read_migrations(module_key: &str, directory: &Path) -> Result<Vec<MigrationFi
 }
 
 /// Order the loaded modules so every module comes after the modules it
-/// depends on, refusing cycles.
+/// depends on, refusing a cycle among the dependencies it cannot do without.
+///
+/// [`ModuleSection::optional_depends_on`] is a preference about order, not a
+/// contract, so it orders the install when it can and is broken when it would
+/// otherwise close a circle: `accounting` and `hr` each name the other as
+/// optional, and one of them has to install first.
 fn dependency_order(
     modules: &[LoadedModule],
     directory: &Path,
@@ -827,15 +832,34 @@ fn visit(
     visiting[index] = true;
     path.push(index);
     let section = &modules[index].manifest.module;
-    let mut dependencies: Vec<usize> = section
+
+    let mut required: Vec<usize> = section
         .depends_on
         .iter()
-        .chain(&section.optional_depends_on)
         .filter_map(|key| index_of(key))
         .collect();
-    dependencies.sort_unstable();
-    dependencies.dedup();
-    for dependency in dependencies {
+    required.sort_unstable();
+    required.dedup();
+    for dependency in required {
+        visit(dependency, modules, index_of, done, visiting, path, ordered)?;
+    }
+
+    // An optional dependency still has to be applied before the module that
+    // uses it when it is present, so it is followed like a required one -
+    // except when it would close a circle. `visiting[dependency]` means this
+    // module is already on the path, so the two want the opposite order and
+    // neither requires it: skip the edge, which is what "optional" allows.
+    let mut optional: Vec<usize> = section
+        .optional_depends_on
+        .iter()
+        .filter_map(|key| index_of(key))
+        .collect();
+    optional.sort_unstable();
+    optional.dedup();
+    for dependency in optional {
+        if visiting[dependency] {
+            continue;
+        }
         visit(dependency, modules, index_of, done, visiting, path, ordered)?;
     }
     path.pop();

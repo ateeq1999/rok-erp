@@ -72,11 +72,13 @@ pub enum Board {
     VerticalDispensary,
     /// See [`Board::VerticalDispensary`].
     VerticalControlledRegister,
+    /// The shared `OfficeReports` board, with the pharmacy's filters.
+    Reports,
 }
 
 impl Board {
     /// Every board a screen can grow from.
-    pub const ALL: [Board; 14] = [
+    pub const ALL: [Board; 15] = [
         Board::Dashboard,
         Board::PrescriptionQueue,
         Board::ClinicalCheckLabel,
@@ -91,6 +93,7 @@ impl Board {
         Board::LicencesInspection,
         Board::VerticalDispensary,
         Board::VerticalControlledRegister,
+        Board::Reports,
     ];
 
     /// The file under `design/pharmacy/`, or the plan's board name where this
@@ -112,6 +115,7 @@ impl Board {
             Board::LicencesInspection => "Pharmacy_licences_amp_inspection.html",
             Board::VerticalDispensary => "VerticalPharmacy",
             Board::VerticalControlledRegister => "VerticalPharmacyRegister",
+            Board::Reports => "OfficeReports",
         }
     }
 }

@@ -4082,6 +4082,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
+name = "pharmacy"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "rok-db",
+ "rok-pos-database",
+ "rok-pos-domain",
+ "rok-pos-pharmacy",
+ "rok-pos-shell",
+ "rok-ui",
+ "rok-ui-build",
+ "tokio",
+]
+
+[[package]]
 name = "pico-args"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4834,21 +4849,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.6",
-]
-
-[[package]]
-name = "rok-pharmacy"
-version = "0.1.0"
-dependencies = [
- "gpui",
- "rok-db",
- "rok-pos-database",
- "rok-pos-domain",
- "rok-pos-pharmacy",
- "rok-pos-shell",
- "rok-ui",
- "rok-ui-build",
- "tokio",
 ]
 
 [[package]]

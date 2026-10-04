@@ -5,7 +5,7 @@
 use rok_ui::prelude::*;
 
 use crate::page_main::PageMain;
-use crate::top_bar::TopBar;
+use crate::top_bar::{TopBar, TopBarStatus};
 
 styles! {
     PAGE = {
@@ -20,6 +20,8 @@ styles! {
 
 /// A page: a top bar named for where you are, and the content under it.
 ///
+/// `status`, `unread` and the two handlers go straight to the [`TopBar`].
+///
 /// ```
 /// # use rok_ui::prelude::*;
 /// # use rok_pos_shell::Page;
@@ -31,12 +33,28 @@ pub fn Page(
     heading: SharedString,
     subheading: SharedString,
     #[default] actions: Vec<AnyElement>,
+    #[default] status: Option<TopBarStatus>,
+    #[default] unread: bool,
+    #[default] on_assistant: Option<EventHandler<()>>,
+    #[default] on_notifications: Option<EventHandler<()>>,
     #[children] children: Vec<AnyElement>,
     #[sx] sx: Sx,
 ) -> impl IntoElement {
+    let mut top_bar = TopBar::new(heading, subheading)
+        .unread(unread)
+        .children(actions);
+    if let Some(status) = status {
+        top_bar = top_bar.status(status);
+    }
+    if let Some(handler) = on_assistant {
+        top_bar = top_bar.on_assistant(move |(), window, cx| handler(&(), window, cx));
+    }
+    if let Some(handler) = on_notifications {
+        top_bar = top_bar.on_notifications(move |(), window, cx| handler(&(), window, cx));
+    }
     div()
         .sx((&PAGE.root, &sx))
-        .child(TopBar::new(heading, subheading).children(actions))
+        .child(top_bar)
         .child(PageMain::new().children(children))
 }
 

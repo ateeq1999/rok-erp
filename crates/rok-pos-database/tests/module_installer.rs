@@ -1,4 +1,4 @@
-//! Phase 1: the installer applies the eight modules in dependency order,
+//! Phase 1: the installer applies every module in dependency order,
 //! records each migration with a checksum, writes progress to
 //! `core.module_jobs.steps`, upserts the permissions, refuses a shipped
 //! migration whose recorded checksum changed, and is a no-op the second time.
@@ -12,6 +12,16 @@ use rok_pos_database::{InstallError, ModuleInstaller, default_modules_directory}
 /// The installer over the modules this repository ships.
 fn installer() -> ModuleInstaller {
     ModuleInstaller::load(&default_modules_directory()).expect("the manifests load")
+}
+
+/// How many modules the repository ships, counted from disk so the assertions
+/// below track the tree rather than a number a reader has to keep in step.
+fn shipped_module_count() -> usize {
+    std::fs::read_dir(default_modules_directory())
+        .expect("the module folder can be read")
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().join("module.toml").is_file())
+        .count()
 }
 
 /// How many up migrations the repository ships in total.
@@ -34,7 +44,11 @@ fn the_modules_are_ordered_by_dependency() {
         .collect();
 
     assert_eq!(order.first(), Some(&"core"), "core installs first");
-    assert_eq!(order.len(), 8, "eight modules ship");
+    assert_eq!(
+        order.len(),
+        shipped_module_count(),
+        "every module folder is loaded, and loaded once"
+    );
     for module in installer.modules() {
         for dependency in &module.manifest.module.depends_on {
             let module_at = order
@@ -55,14 +69,15 @@ fn the_modules_are_ordered_by_dependency() {
 }
 
 /// The four spikes' promise, now for the real thing: an empty database ends
-/// up with all eight modules, and installing again changes nothing.
+/// up with every module, and installing again changes nothing.
 #[rok_db::test]
 async fn an_empty_database_installs_every_module_then_changes_nothing(db: Db) {
     let installer = installer();
     let shipped = shipped_migration_count(&installer);
+    let modules = shipped_module_count();
 
     let report = installer.install(&db).await.expect("the install succeeds");
-    assert_eq!(report.modules.len(), 8, "eight modules installed");
+    assert_eq!(report.modules.len(), modules, "every module was installed");
     assert_eq!(report.total_applied(), shipped, "every shipped file ran");
 
     let recorded: i64 = raw("select count(*) from core.applied_migrations")
@@ -76,7 +91,11 @@ async fn an_empty_database_installs_every_module_then_changes_nothing(db: Db) {
             .scalar(&db)
             .await
             .expect("the module registry counts its rows");
-    assert_eq!(installed, 8, "all eight modules are marked installed");
+    assert_eq!(
+        installed,
+        i64::try_from(modules).unwrap_or(i64::MAX),
+        "every module is marked installed"
+    );
 
     // Progress: one succeeded job per module, every one carrying steps.
     let jobs: i64 = raw("select count(*) from core.module_jobs \
@@ -85,7 +104,11 @@ async fn an_empty_database_installs_every_module_then_changes_nothing(db: Db) {
     .scalar(&db)
     .await
     .expect("the jobs count their steps");
-    assert_eq!(jobs, 8, "every module recorded its steps");
+    assert_eq!(
+        jobs,
+        i64::try_from(modules).unwrap_or(i64::MAX),
+        "every module recorded its steps"
+    );
 
     // The pharmacy permissions from plan step 3, plus the ones 0001 shipped.
     for key in [
@@ -194,17 +217,64 @@ async fn every_down_migration_reverses_then_reapplies(db: Db) {
         "every up migration has a down migration that ran"
     );
 
-    let schemas_left: i64 = raw("select count(*) from information_schema.schemata \
-         where schema_name in ('core', 'catalog', 'inventory', 'customers', \
-                                'point_of_sale', 'purchasing', 'marketplace', 'pharmacy')")
-    .scalar(&db)
-    .await
-    .expect("the catalog counts schemas");
-    assert_eq!(schemas_left, 0, "every module schema is gone");
+    // Every schema a module owns is gone, asked of the installer's own list so
+    // the assertion tracks whatever the repository ships.
+    for module in installer.modules() {
+        let schema = module.manifest.module.schema.as_str();
+        let left: i64 = raw("select count(*) from information_schema.schemata \
+             where schema_name = ?")
+        .bind(schema)
+        .scalar(&db)
+        .await
+        .expect("the catalog counts the module schema");
+        assert_eq!(
+            left, 0,
+            "{}'s schema {schema} is gone",
+            module.manifest.module.key
+        );
+    }
 
     let again = installer
         .install(&db)
         .await
         .expect("the second install runs");
     assert_eq!(again.total_applied(), shipped, "everything applied again");
+}
+
+/// Relaxing the cycle rule for `optional_depends_on` must not have removed
+/// cycle detection: `depends_on` closing a circle still stops the install.
+#[test]
+fn a_cycle_of_required_dependencies_is_refused() {
+    let root = std::env::temp_dir().join(format!(
+        "rok-installer-cycle-{}",
+        uuid::Uuid::now_v7().simple()
+    ));
+    for (key, dependency) in [("alpha", "beta"), ("beta", "alpha")] {
+        let folder = root.join(key);
+        std::fs::create_dir_all(folder.join("migrations")).expect("the module folder can be made");
+        std::fs::write(
+            folder.join("module.toml"),
+            format!(
+                "[module]\n\
+                 key = \"{key}\"\n\
+                 name = \"{key}\"\n\
+                 version = \"1.0.0\"\n\
+                 schema = \"{key}\"\n\
+                 depends_on = [\"{dependency}\"]\n"
+            ),
+        )
+        .expect("the manifest can be written");
+    }
+
+    match ModuleInstaller::load(&root) {
+        Err(InstallError::DependencyCycle { chain }) => {
+            assert!(
+                chain.contains("alpha") && chain.contains("beta"),
+                "the chain names both halves of the cycle: {chain}"
+            );
+        }
+        Err(other) => panic!("the cycle was refused, but with the wrong error: {other}"),
+        Ok(_) => panic!("a cycle of required dependencies must be refused"),
+    }
+    let _ = std::fs::remove_dir_all(&root);
 }

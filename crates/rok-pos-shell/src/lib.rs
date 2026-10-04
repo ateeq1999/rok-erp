@@ -13,7 +13,7 @@
 //! use rok_pos_shell::{AppFrame, NavGroup, NavItem, PageHeader, PageMain, Sidebar, TopBar};
 //!
 //! let window = AppFrame::new(Sidebar::new("Afya Pharmacy", "Mwenge branch").groups(vec![
-//!     NavGroup::new("Dispensing", [NavItem::new("Dashboard", IconName::Home).href("/")]),
+//!     NavGroup::new("Dispensary", [NavItem::new("Dashboard").href("/")]),
 //! ]).into_any_element())
 //! .child(TopBar::new("Dashboard", "Afya Pharmacy - Mwenge branch"))
 //! .child(PageMain::new().child(PageHeader::new("Dashboard", "Tuesday, 4 August")));
@@ -44,7 +44,7 @@ pub use money_text::{CURRENCY, MoneyText, format_amount, format_money, format_mo
 pub use page::Page;
 pub use page_header::PageHeader;
 pub use page_main::PageMain;
-pub use sidebar::{NavGroup, NavItem, Sidebar, UserChip};
+pub use sidebar::{NavBadge, NavGroup, NavItem, Sidebar, SidebarAction, UserChip};
 pub use theme::{install_theme, pharmacy_theme, sync_with_system_appearance};
 pub use tone::{Tone, ToneColors};
-pub use top_bar::TopBar;
+pub use top_bar::{TopBar, TopBarStatus};

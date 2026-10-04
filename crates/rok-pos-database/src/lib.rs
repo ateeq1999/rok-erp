@@ -20,6 +20,7 @@
 pub mod business_session;
 pub mod models;
 pub mod module_installer;
+pub mod module_manifest;
 
 pub use business_session::{BusinessSession, in_business};
 pub use module_installer::{
@@ -27,3 +28,4 @@ pub use module_installer::{
     ModuleReport, PermissionEntry, default_modules_directory, default_story_seed_path,
     load_afya_story, load_sql_file,
 };
+pub use module_manifest::{ModuleError, ModuleSource};
