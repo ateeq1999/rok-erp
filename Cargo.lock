@@ -4847,8 +4847,13 @@ dependencies = [
  "rok-db",
  "rok-pos-domain",
  "rust_decimal",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
  "sqlx",
+ "thiserror 2.0.21",
  "tokio",
+ "toml 0.8.23",
  "uuid",
 ]
 

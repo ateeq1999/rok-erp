@@ -18,5 +18,11 @@
 //! ```
 
 pub mod business_session;
+pub mod module_installer;
 
 pub use business_session::{BusinessSession, in_business};
+pub use module_installer::{
+    InstallError, InstallReport, LoadedModule, MigrationFile, ModuleInstaller, ModuleManifest,
+    ModuleReport, PermissionEntry, default_modules_directory, default_story_seed_path,
+    load_afya_story, load_sql_file,
+};
