@@ -1,14 +1,16 @@
-//! The left navigation column: the brand, groups of destinations, and who is
-//! signed in.
+//! The left navigation column, as the `PharmacySidebar` board draws it: the
+//! rok POS mark, the business and branch, the one big action, groups of
+//! destinations with their counts, and who is signed in.
 //!
 //! The shell draws the column; the app says what goes in it. [`NavGroup`] and
-//! [`NavItem`] are plain data, so `apps/rok-pharmacy` can list its own
+//! [`NavItem`] are plain data, so `apps/pharmacy` can list its own
 //! destinations and a supplier app can list its own.
 
 use rok_ui::prelude::*;
 use rok_ui::router::{is_active, navigate, preload};
 
-use crate::theme::{ACCENT, ACCENT_STRONG, ACCENT_TINT, hsla};
+use crate::theme::{ACCENT, ROK_MARK, hsla};
+use crate::tone::{self, Tone};
 
 /// How wide the column is, in pixels.
 pub const WIDTH_PX: f32 = 240.;
@@ -16,48 +18,71 @@ pub const WIDTH_PX: f32 = 240.;
 /// How wide the column is in spacing units, which is how the styles read it.
 pub const WIDTH: f32 = WIDTH_PX / 4.;
 
-/// How tall a destination row is, in spacing units (36 pixels).
-pub const ROW_HEIGHT: f32 = 9.;
+/// How tall a destination row is, in pixels.
+pub const ROW_HEIGHT_PX: f32 = 34.;
+
+/// The product's name beside its mark.
+pub const PRODUCT_NAME: &str = "rok POS";
+
+/// A count beside a destination: "6" prescriptions waiting, "1" recall open.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct NavBadge {
+    /// What the badge says.
+    pub text: SharedString,
+    /// How urgent it is: [`Tone::Brand`] to inform, [`Tone::Warning`] or
+    /// [`Tone::Danger`] when something is late or blocked.
+    pub tone: Tone,
+}
 
 /// One destination in the sidebar.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NavItem {
     /// The words on the row.
     label: SharedString,
-    /// The glyph beside them.
-    icon: IconName,
     /// The path it opens, as the router spells it: `/prescriptions`.
     href: SharedString,
     /// Count as current only on this exact path, not on paths below it.
     exact: bool,
+    /// The count beside the words, when there is one.
+    badge: Option<NavBadge>,
 }
 
 impl NavItem {
-    /// A row for `label` with `icon` beside it.
+    /// A row for `label`.
     #[must_use]
-    pub fn new(label: impl Into<SharedString>, icon: IconName) -> Self {
+    pub fn new(label: impl Into<SharedString>) -> Self {
         Self {
             label: label.into(),
-            icon,
             href: SharedString::default(),
             exact: false,
+            badge: None,
         }
     }
 
-    /// The path this row opens.
+    /// The path this row opens. Default: none.
     #[must_use]
     pub fn href(mut self, href: impl Into<SharedString>) -> Self {
         self.href = href.into();
         self
     }
 
-    /// Mark this row current only on its own path.
+    /// Mark this row current only on its own path. Default: `false`.
     ///
     /// Worth it for `/prescriptions`, so `/prescriptions/42/check` does not light
     /// up both rows.
     #[must_use]
     pub fn exact(mut self, exact: bool) -> Self {
         self.exact = exact;
+        self
+    }
+
+    /// A count beside the words. Default: none.
+    #[must_use]
+    pub fn badge(mut self, text: impl Into<SharedString>, tone: Tone) -> Self {
+        self.badge = Some(NavBadge {
+            text: text.into(),
+            tone,
+        });
         self
     }
 
@@ -73,20 +98,20 @@ impl NavItem {
         &self.href
     }
 
-    /// The glyph beside the words.
-    #[must_use]
-    pub const fn icon(&self) -> IconName {
-        self.icon
-    }
-
     /// Whether this row counts as current only on its own path.
     #[must_use]
     pub const fn is_exact(&self) -> bool {
         self.exact
     }
+
+    /// The count beside the words, when there is one.
+    #[must_use]
+    pub const fn badge_value(&self) -> Option<&NavBadge> {
+        self.badge.as_ref()
+    }
 }
 
-/// A labelled set of rows: "Dispensing", "Inventory", "Records", "Admin".
+/// A labelled set of rows: "Dispensary", "Medicines & stock", "Money & rules".
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct NavGroup {
     label: SharedString,
@@ -123,7 +148,7 @@ pub struct UserChip {
     pub initials: SharedString,
     /// The person's name.
     pub name: SharedString,
-    /// What they do here: "Pharmacist".
+    /// What they do here: "Pharmacist in charge".
     pub role: SharedString,
 }
 
@@ -143,51 +168,123 @@ impl UserChip {
     }
 }
 
+/// The one big button under the business: "Open dispensary till".
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SidebarAction {
+    /// The words on the button.
+    pub label: SharedString,
+    /// The path it opens.
+    pub href: SharedString,
+}
+
+impl SidebarAction {
+    /// A button that opens `href`.
+    #[must_use]
+    pub fn new(label: impl Into<SharedString>, href: impl Into<SharedString>) -> Self {
+        Self {
+            label: label.into(),
+            href: href.into(),
+        }
+    }
+}
+
+/// The letters on a business's square: the first letter of its first two words.
+///
+/// ```
+/// # use rok_pos_shell::sidebar::initials;
+/// assert_eq!(initials("Afya Pharmacy"), "AP");
+/// assert_eq!(initials("uzima"), "U");
+/// ```
+#[must_use]
+pub fn initials(name: &str) -> String {
+    name.split_whitespace()
+        .filter_map(|word| word.chars().next())
+        .take(2)
+        .flat_map(char::to_uppercase)
+        .collect()
+}
+
 styles! {
     SIDEBAR = {
         root: {
             display: flex,
             flex_direction: column,
+            gap: 3,
             shrink: 0,
+            width: {px(WIDTH_PX)},
             height: full,
+            padding_y: 4,
+            padding_x: 3.5,
             background: card,
             color: foreground,
             border_right: 1,
             border_color: border,
             font_family: sans,
-            text: base,
+            text: {14.},
         },
-        brand: {
+        brand: { display: flex, flex_direction: row, align: center, gap: 2.5, padding_x: 1.5 },
+        mark: { position: relative, size: 7.5, shrink: 0, background: {hsla(ROK_MARK)} },
+        product: { grow: 1, font_family: mono, text: {20.}, font: bold },
+        icon_button: {
+            display: flex,
+            align: center,
+            justify: center,
+            size: 9,
+            shrink: 0,
+            color: muted_foreground,
+            cursor: pointer,
+        },
+        business: {
             display: flex,
             flex_direction: row,
             align: center,
-            gap: 3,
-            padding: 4,
-            border_bottom: 1,
+            gap: 2.5,
+            padding_y: 2,
+            padding_x: 2.5,
+            border: 1,
             border_color: border,
+            background: background,
+            cursor: pointer,
         },
-        mark: {
+        business_square: {
             display: flex,
             align: center,
             justify: center,
             size: 8,
+            shrink: 0,
             background: primary,
             color: primary_foreground,
+            font_family: mono,
             font: bold,
         },
-        brand_name: { font: semibold, color: foreground },
-        brand_tagline: { text: xs, color: muted_foreground },
+        names: { display: flex, flex_direction: column, grow: 1, min_width: 0 },
+        name: { font: semibold, truncate: true },
+        detail: { text: {12.}, color: muted_foreground, truncate: true },
+        action: {
+            display: flex,
+            align: center,
+            justify: center,
+            height: 10.5,
+            shrink: 0,
+            background: primary,
+            color: primary_foreground,
+            text: {15.},
+            font: semibold,
+            cursor: pointer,
+            hover: { background: primary/90 },
+        },
         list: {
-            flex: 1,
+            grow: 1,
+            min_height: 0,
             display: flex,
             flex_direction: column,
-            gap: 4,
-            padding: 3,
+            gap: 3,
         },
+        group: { display: flex, flex_direction: column, gap: {px(1.)} },
         group_label: {
-            padding_x: 3,
-            padding_y: 1,
-            text: xs,
+            padding_x: 2.5,
+            padding_bottom: 1,
+            text: {11.},
             font: semibold,
             color: muted_foreground,
         },
@@ -195,18 +292,21 @@ styles! {
             display: flex,
             flex_direction: row,
             align: center,
-            gap: 3,
-            height: ROW_HEIGHT,
-            padding_x: 3,
-            radius: none,
+            gap: 2.5,
+            height: {px(ROW_HEIGHT_PX)},
+            shrink: 0,
+            padding_x: 2.5,
             cursor: pointer,
         },
+        row_label: { grow: 1, truncate: true },
+        badge: { padding_x: {px(7.)}, padding_y: {px(1.)}, text: {12.}, font: semibold },
         user: {
             display: flex,
             flex_direction: row,
             align: center,
-            gap: 3,
-            padding: 3,
+            gap: 2.5,
+            padding_top: 2.5,
+            padding_x: 2,
             border_top: 1,
             border_color: border,
         },
@@ -214,57 +314,87 @@ styles! {
             display: flex,
             align: center,
             justify: center,
-            size: 8,
+            size: 9,
+            shrink: 0,
+            radius: full,
             background: accent,
             color: accent_foreground,
             font: semibold,
-            text: xs,
-            radius: full,
         },
-        user_name: { font: medium, color: foreground },
-        user_role: { text: xs, color: muted_foreground },
     }
 }
 
-/// The colours a destination row is drawn in.
-struct RowColors {
-    background: gpui::Hsla,
-    foreground: gpui::Hsla,
-    hover: gpui::Hsla,
-}
-
-/// The colours for a row that is (or is not) the current page.
-fn row_colors(active: bool, colors: &ThemeColors) -> RowColors {
-    if active {
-        RowColors {
-            background: hsla(ACCENT_TINT),
-            foreground: hsla(ACCENT_STRONG),
-            hover: hsla(ACCENT_TINT),
-        }
-    } else {
-        RowColors {
-            background: hsla(ACCENT_TINT).alpha(0.),
-            foreground: colors.muted_foreground,
-            hover: hsla(ACCENT_TINT).alpha(0.5),
-        }
-    }
-}
-
-fn nav_row(item: &NavItem, active: bool, colors: &ThemeColors) -> impl IntoElement {
-    let palette = row_colors(active, colors);
-    let click = item.href.clone();
-    let keys = item.href.clone();
-    let hover = item.href.clone();
+/// A clickable box that also answers Enter and Space, so a keyboard reaches
+/// everything a mouse does.
+fn pressable(
+    id: impl Into<ElementId>,
+    on_press: impl Fn(&mut Window, &mut App) + 'static,
+) -> gpui::Stateful<Div> {
+    let on_press = std::rc::Rc::new(on_press);
+    let keys = on_press.clone();
     div()
-        .id(item.href.clone())
+        .id(id)
         .tab_index(0)
-        .on_click(move |_, _, cx| navigate(click.clone(), cx))
-        .on_key_down(move |event, _, cx| {
+        .on_click(move |_, window, cx| on_press(window, cx))
+        .on_key_down(move |event, window, cx| {
             if matches!(event.keystroke.key.as_str(), "enter" | "space") {
                 cx.stop_propagation();
-                navigate(keys.clone(), cx);
+                keys(window, cx);
             }
         })
+}
+
+/// Call `handler` when there is one.
+fn fire(handler: Option<&EventHandler<()>>, window: &mut Window, cx: &mut App) {
+    if let Some(handler) = handler {
+        handler(&(), window, cx);
+    }
+}
+
+/// The rok POS mark: an ember square with three bars, each fainter than the last.
+fn mark() -> impl IntoElement {
+    let bar = |left: f32, top: f32, width: f32, opacity: f32| {
+        div()
+            .absolute()
+            .left(px(left))
+            .top(px(top))
+            .w(px(width))
+            .h(px(4.))
+            .bg(gpui::white().opacity(opacity))
+    };
+    div()
+        .sx(&SIDEBAR.mark)
+        .child(bar(7., 8., 16., 1.))
+        .child(bar(11., 13., 12., 0.8))
+        .child(bar(7., 18., 16., 0.6))
+}
+
+/// Four outlined squares: the way to every app this business has installed.
+fn all_apps_glyph(color: Hsla) -> impl IntoElement {
+    let square = || div().size(px(7.)).border_1().border_color(color);
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(3.))
+        .child(div().flex().gap(px(3.)).child(square()).child(square()))
+        .child(div().flex().gap(px(3.)).child(square()).child(square()))
+}
+
+fn nav_row(
+    item: &NavItem,
+    active: bool,
+    mode: ThemeMode,
+    colors: &ThemeColors,
+) -> impl IntoElement {
+    let neutral = tone::colors(Tone::Neutral, mode);
+    let (background, foreground) = if active {
+        (colors.accent, colors.accent_foreground)
+    } else {
+        (colors.accent.alpha(0.), neutral.foreground)
+    };
+    let href = item.href.clone();
+    let hover = item.href.clone();
+    pressable(item.href.clone(), move |_, cx| navigate(href.clone(), cx))
         .on_hover(move |hovered, _, cx| {
             if *hovered && !hover.is_empty() {
                 preload(&hover, cx);
@@ -273,67 +403,127 @@ fn nav_row(item: &NavItem, active: bool, colors: &ThemeColors) -> impl IntoEleme
         .sx(sx![
             &SIDEBAR.row,
             style! {
-                background: {palette.background},
-                color: {palette.foreground},
-                hover: { background: {palette.hover} },
+                background: {background},
+                color: {foreground},
+                hover: { background: {colors.accent} },
             },
             active.then_some(style! { font: semibold }),
         ])
-        .child(Icon::new(item.icon).size(px(16.)).color(palette.foreground))
-        .child(item.label.clone())
-}
-
-fn nav_group(label: &SharedString, items: Vec<impl IntoElement>) -> impl IntoElement {
-    div()
-        .when(!label.is_empty(), |group| {
-            group.child(div().sx(&SIDEBAR.group_label).child(label.to_uppercase()))
+        .child(div().sx(&SIDEBAR.row_label).child(item.label.clone()))
+        .when_some(item.badge.clone(), |row, badge| {
+            let palette = tone::colors(badge.tone, mode);
+            row.child(
+                div()
+                    .sx(sx![
+                        &SIDEBAR.badge,
+                        style! { background: {palette.background}, color: {palette.foreground} },
+                    ])
+                    .child(badge.text),
+            )
         })
-        .children(items)
 }
 
-/// The left column: brand, destinations, and the signed-in user.
+/// The left column: product, business, the big action, destinations, and the
+/// signed-in user.
 ///
 /// ```
 /// # use rok_ui::prelude::*;
-/// # use rok_pos_shell::{NavGroup, NavItem, Sidebar};
-/// let sidebar = Sidebar::new("Afya Pharmacy", "Dispensing & inventory").groups(vec![
-///     NavGroup::new("Dispensing", [
-///         NavItem::new("Overview", IconName::Home).href("/"),
-///         NavItem::new("Prescriptions", IconName::FileText).href("/prescriptions").exact(true),
-///     ]),
-/// ]);
+/// # use rok_pos_shell::{NavGroup, NavItem, Sidebar, SidebarAction, Tone};
+/// let sidebar = Sidebar::new("Afya Pharmacy", "Mwenge branch")
+///     .action(SidebarAction::new("Open dispensary till", "/till"))
+///     .groups(vec![NavGroup::new("Dispensary", [
+///         NavItem::new("Dashboard").href("/").exact(true),
+///         NavItem::new("Prescriptions").href("/prescriptions").badge("6", Tone::Brand),
+///     ])]);
 /// ```
 #[component]
 pub fn Sidebar(
-    brand: SharedString,
-    tagline: SharedString,
+    business: SharedString,
+    branch: SharedString,
+    #[default] action: Option<SidebarAction>,
     #[default] groups: Vec<NavGroup>,
     #[default] user: Option<UserChip>,
+    #[default] on_all_apps: Option<EventHandler<()>>,
+    #[default] on_switch_business: Option<EventHandler<()>>,
+    #[default] on_sign_out: Option<EventHandler<()>>,
     #[sx] sx: Sx,
     cx: &mut Cx,
 ) -> impl IntoElement {
     let colors = cx.theme().colors.clone();
-    let mut rendered = Vec::new();
-    for group in &groups {
-        let mut rows = Vec::new();
-        for item in group.items() {
-            let active = is_active(&item.href, item.exact, cx);
-            rows.push(nav_row(item, active, &colors));
-        }
-        rendered.push(nav_group(&group.label, rows));
-    }
+    let mode = cx.theme().mode;
+    let rendered: Vec<AnyElement> = groups
+        .iter()
+        .map(|group| {
+            let rows: Vec<AnyElement> = group
+                .items()
+                .iter()
+                .map(|item| {
+                    let active = is_active(&item.href, item.exact, cx);
+                    nav_row(item, active, mode, &colors).into_any_element()
+                })
+                .collect();
+            div()
+                .sx(&SIDEBAR.group)
+                .when(!group.label.is_empty(), |column| {
+                    column.child(
+                        div()
+                            .sx(&SIDEBAR.group_label)
+                            .child(group.label.to_uppercase()),
+                    )
+                })
+                .children(rows)
+                .into_any_element()
+        })
+        .collect();
+
     div()
         .sx((&SIDEBAR.root, &sx))
         .child(
             div()
                 .sx(&SIDEBAR.brand)
-                .child(div().sx(&SIDEBAR.mark).child("A"))
+                .child(mark())
+                .child(div().sx(&SIDEBAR.product).child(PRODUCT_NAME))
                 .child(
-                    div()
-                        .child(div().sx(&SIDEBAR.brand_name).child(brand))
-                        .child(div().sx(&SIDEBAR.brand_tagline).child(tagline)),
+                    pressable("sidebar-all-apps", move |window, cx| {
+                        fire(on_all_apps.as_ref(), window, cx);
+                    })
+                    .sx(sx![
+                        &SIDEBAR.icon_button,
+                        style! { border: 1, border_color: border }
+                    ])
+                    .child(all_apps_glyph(colors.foreground)),
                 ),
         )
+        .child(
+            pressable("sidebar-business", move |window, cx| {
+                fire(on_switch_business.as_ref(), window, cx);
+            })
+            .sx(&SIDEBAR.business)
+            .child(
+                div()
+                    .sx(&SIDEBAR.business_square)
+                    .child(initials(&business)),
+            )
+            .child(
+                div()
+                    .sx(&SIDEBAR.names)
+                    .child(div().sx(&SIDEBAR.name).child(business))
+                    .child(div().sx(&SIDEBAR.detail).child(branch)),
+            )
+            .child(
+                Icon::new(IconName::ChevronsUpDown)
+                    .size(px(16.))
+                    .color(colors.muted_foreground),
+            ),
+        )
+        .when_some(action, |column, action| {
+            let href = action.href.clone();
+            column.child(
+                pressable("sidebar-action", move |_, cx| navigate(href.clone(), cx))
+                    .sx(&SIDEBAR.action)
+                    .child(action.label),
+            )
+        })
         .child(
             div()
                 .sx(&SIDEBAR.list)
@@ -341,56 +531,81 @@ pub fn Sidebar(
                 .overflow_y_scroll()
                 .children(rendered),
         )
-        .when_some(user, |sidebar, user| {
-            sidebar.child(
+        .when_some(user, |column, user| {
+            column.child(
                 div()
                     .sx(&SIDEBAR.user)
                     .child(div().sx(&SIDEBAR.avatar).child(user.initials))
                     .child(
                         div()
-                            .child(div().sx(&SIDEBAR.user_name).child(user.name))
-                            .child(div().sx(&SIDEBAR.user_role).child(user.role)),
+                            .sx(&SIDEBAR.names)
+                            .child(div().sx(&SIDEBAR.name).child(user.name))
+                            .child(div().sx(&SIDEBAR.detail).child(user.role)),
+                    )
+                    .child(
+                        pressable("sidebar-sign-out", move |window, cx| {
+                            fire(on_sign_out.as_ref(), window, cx);
+                        })
+                        .sx(&SIDEBAR.icon_button)
+                        .child(
+                            Icon::new(IconName::LogOut)
+                                .size(px(18.))
+                                .color(colors.muted_foreground),
+                        ),
                     ),
             )
         })
 }
 
-/// The teal the brand mark and the current row are drawn in, as one value, so an
-/// app that draws its own shell can match it.
+/// The teal the business square and the current row are drawn in, as one value,
+/// so an app that draws its own shell can match it.
 #[must_use]
-pub fn brand_color() -> gpui::Hsla {
+pub fn brand_color() -> Hsla {
     hsla(ACCENT)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{NavGroup, NavItem, Sidebar, UserChip, brand_color};
+    use super::{NavGroup, NavItem, Sidebar, SidebarAction, UserChip, brand_color, initials};
     use crate::theme::{ACCENT, hsla};
+    use crate::tone::Tone;
     use rok_ui::prelude::*;
 
     #[test]
-    fn an_item_keeps_its_words_icon_and_path() {
-        let item = NavItem::new("Prescriptions", IconName::FileText)
+    fn an_item_keeps_its_words_path_and_badge() {
+        let item = NavItem::new("Prescriptions")
             .href("/prescriptions")
-            .exact(true);
+            .exact(true)
+            .badge("6", Tone::Brand);
         assert_eq!(item.label(), "Prescriptions");
         assert_eq!(item.target(), "/prescriptions");
-        assert_eq!(item.icon(), IconName::FileText);
         assert!(item.is_exact());
+        let badge = item.badge_value().expect("a badge");
+        assert_eq!(badge.text, "6");
+        assert_eq!(badge.tone, Tone::Brand);
+        assert!(NavItem::new("Patients").badge_value().is_none());
     }
 
     #[test]
     fn a_group_keeps_its_rows_in_order() {
         let group = NavGroup::new(
-            "Dispensing",
+            "Dispensary",
             [
-                NavItem::new("Overview", IconName::Home).href("/"),
-                NavItem::new("Prescriptions", IconName::FileText).href("/prescriptions"),
+                NavItem::new("Dashboard").href("/"),
+                NavItem::new("Prescriptions").href("/prescriptions"),
             ],
         );
-        assert_eq!(group.label(), "Dispensing");
+        assert_eq!(group.label(), "Dispensary");
         let labels: Vec<&SharedString> = group.items().iter().map(NavItem::label).collect();
-        assert_eq!(labels, ["Overview", "Prescriptions"]);
+        assert_eq!(labels, ["Dashboard", "Prescriptions"]);
+    }
+
+    #[test]
+    fn a_business_square_carries_two_initials_at_most() {
+        assert_eq!(initials("Afya Pharmacy"), "AP");
+        assert_eq!(initials("Uzima Pharmaceuticals Limited"), "UP");
+        assert_eq!(initials("afya"), "A");
+        assert_eq!(initials("  "), "");
     }
 
     #[test]
@@ -402,22 +617,27 @@ mod tests {
 
     impl Render for Frame {
         fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
-            Sidebar::new("Afya Pharmacy", "Dispensing & inventory")
+            Sidebar::new("Afya Pharmacy", "Mwenge branch")
+                .action(SidebarAction::new("Open dispensary till", "/till"))
                 .groups(vec![NavGroup::new(
-                    "Dispensing",
+                    "Dispensary",
                     [
-                        NavItem::new("Overview", IconName::Home).href("/"),
-                        NavItem::new("Prescriptions", IconName::FileText)
+                        NavItem::new("Dashboard").href("/").exact(true),
+                        NavItem::new("Prescriptions")
                             .href("/prescriptions")
-                            .exact(true),
+                            .badge("6", Tone::Brand),
+                        NavItem::new("Recalls")
+                            .href("/recalls")
+                            .badge("1", Tone::Danger),
                     ],
                 )])
-                .user(UserChip::new("AT", "Amani T.", "Pharmacist"))
+                .user(UserChip::new("GN", "Grace N.", "Pharmacist in charge"))
+                .on_sign_out(|(), _, _| {})
         }
     }
 
     #[gpui::test]
-    fn draws_with_groups_and_a_user(cx: &mut gpui::TestAppContext) {
+    fn draws_with_groups_badges_and_a_user(cx: &mut gpui::TestAppContext) {
         cx.update(|cx| {
             rok_ui::init(cx);
             crate::fonts::install(cx).expect("the bundled fonts load");

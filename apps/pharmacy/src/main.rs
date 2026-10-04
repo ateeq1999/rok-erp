@@ -4,7 +4,7 @@ use gpui::prelude::*;
 use gpui::{Bounds, TitlebarOptions, WindowBounds, WindowOptions};
 use rok_ui::prelude::*;
 
-use rok_pharmacy::routes;
+use pharmacy::routes;
 
 /// How wide the window opens.
 const WINDOW_WIDTH: gpui::Pixels = px(1440.);

@@ -16,6 +16,29 @@ pub const ACCENT_STRONG: u32 = 0x11_5E_59;
 /// The tint a selected row, a hover or a chip is filled with.
 pub const ACCENT_TINT: u32 = 0xF0_FD_FA;
 
+/// The rok POS mark's ember square. It is the product's own colour, not a
+/// business's, so it stays the same whatever accent the business picks.
+pub const ROK_MARK: u32 = 0xB4_40_0F;
+
+/// The three colours a chart's series are drawn in, darkest first, so each
+/// series differs in lightness as well as hue.
+#[must_use]
+pub fn chart_series(mode: ThemeMode) -> [Hsla; 3] {
+    match mode {
+        ThemeMode::Light => [hsla(ACCENT), hsla(0x5E_EA_D4), hsla(0xA8_A2_9E)],
+        ThemeMode::Dark => [hsla(0x2D_D4_BF), hsla(0x13_4E_4A), hsla(0x78_71_6C)],
+    }
+}
+
+/// The colour of a bar still filling up, such as the hour in progress.
+#[must_use]
+pub fn chart_in_progress(mode: ThemeMode) -> Hsla {
+    match mode {
+        ThemeMode::Light => hsla(0x99_F6_E4),
+        ThemeMode::Dark => hsla(0x11_5E_59),
+    }
+}
+
 /// The smallest contrast ratio a text colour may have against its surface.
 pub const MINIMUM_TEXT_CONTRAST: f32 = 4.5;
 

@@ -2,8 +2,7 @@
 
 use rok_ui::prelude::*;
 use rok_ui::router::file_route;
-use rok_pos_pharmacy::screens;
-use rok_pos_shell::Page;
+use rok_pos_pharmacy::{frame, screens};
 
 file_route! { component: PatientPage }
 
@@ -11,6 +10,6 @@ file_route! { component: PatientPage }
 #[component]
 fn PatientPage(cx: &mut App) -> impl IntoElement {
     let route = params(cx);
-    Page::new("Patient record", "Afya Pharmacy - Mwenge branch")
+    frame::titled("Patient record")
         .child(screens::patient_profile::record(&route.patient_id))
 }

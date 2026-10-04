@@ -2,14 +2,13 @@
 
 use rok_ui::prelude::*;
 use rok_ui::router::file_route;
-use rok_pos_pharmacy::{navigation, screens};
-use rok_pos_shell::Page;
+use rok_pos_pharmacy::{frame, screens};
 
 file_route! { component: ClaimsPage }
 
 /// The claims page.
 #[component]
 fn ClaimsPage() -> impl IntoElement {
-    Page::new(navigation::label("/claims"), navigation::subheading("/claims"))
+    frame::page("/claims")
         .child(screens::insurance_claims::view())
 }

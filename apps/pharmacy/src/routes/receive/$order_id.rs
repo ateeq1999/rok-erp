@@ -3,8 +3,7 @@
 
 use rok_ui::prelude::*;
 use rok_ui::router::file_route;
-use rok_pos_pharmacy::screens;
-use rok_pos_shell::Page;
+use rok_pos_pharmacy::{frame, screens};
 
 file_route! { component: ReceiveOrderPage }
 
@@ -12,6 +11,6 @@ file_route! { component: ReceiveOrderPage }
 #[component]
 fn ReceiveOrderPage(cx: &mut App) -> impl IntoElement {
     let route = params(cx);
-    Page::new("Receive delivery", "Afya Pharmacy - Mwenge branch")
+    frame::titled("Receive delivery")
         .child(screens::receive_delivery::view(&route.order_id))
 }

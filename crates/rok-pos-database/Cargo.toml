@@ -9,12 +9,16 @@ description = "PostgreSQL access for rok POS: business sessions, models and repo
 [dependencies]
 chrono.workspace = true
 rok-db.workspace = true
-rok-pos-domain.workspace = true
+rok-pos-domain = { workspace = true, features = ["postgres"] }
+rust_decimal.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+toml.workspace = true
 uuid.workspace = true
 
 [dev-dependencies]
-rust_decimal.workspace = true
-sqlx.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 
 [lints]

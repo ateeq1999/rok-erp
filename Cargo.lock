@@ -3476,6 +3476,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "migration-verifier"
+version = "0.1.0"
+dependencies = [
+ "rok-db",
+ "rok-pos-database",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
 name = "mime"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4071,6 +4081,18 @@ name = "percent-encoding"
 version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
+
+[[package]]
+name = "pharmacy"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "rok-pos-domain",
+ "rok-pos-pharmacy",
+ "rok-pos-shell",
+ "rok-ui",
+ "rok-ui-build",
+]
 
 [[package]]
 name = "pico-args"
@@ -4828,18 +4850,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rok-pharmacy"
-version = "0.1.0"
-dependencies = [
- "gpui",
- "rok-pos-domain",
- "rok-pos-pharmacy",
- "rok-pos-shell",
- "rok-ui",
- "rok-ui-build",
-]
-
-[[package]]
 name = "rok-pos-database"
 version = "0.1.0"
 dependencies = [
@@ -4847,8 +4857,12 @@ dependencies = [
  "rok-db",
  "rok-pos-domain",
  "rust_decimal",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
  "sqlx",
  "tokio",
+ "toml 0.8.23",
  "uuid",
 ]
 

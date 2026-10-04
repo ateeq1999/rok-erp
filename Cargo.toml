@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "apps/*"]
+members = ["crates/*", "apps/*", "tools/*"]
 
 [workspace.package]
 version = "0.1.0"
@@ -12,10 +12,14 @@ license = "MIT"
 gpui = "0.2.2"
 rok-ui = { version = "0.7.0", features = ["full", "query", "router", "db", "db-chrono", "db-uuid"] }
 rok-db = { version = "0.3", features = ["chrono", "uuid", "json", "serde", "testing"] }
+serde_json = "1"
+sha2 = "0.10"
 sqlx = { version = "0.8", default-features = false, features = ["rust_decimal"] }
 rust_decimal = "1"
 rok-pos-domain = { path = "crates/rok-pos-domain" }
 rok-pos-shell = { path = "crates/rok-pos-shell" }
+rok-pos-database = { path = "crates/rok-pos-database" }
+rok-pos-hardware = { path = "crates/rok-pos-hardware" }
 rok-pos-pharmacy = { path = "crates/rok-pos-pharmacy" }
 rok-ui-build = "0.7.0"
 uuid = { version = "1", features = ["v7"] }

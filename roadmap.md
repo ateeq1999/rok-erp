@@ -5,7 +5,7 @@ step, in plan order, with the plan's own wording where it helps.
 
 ## Phase 0 — Workspace, shell and spikes
 
-**Goal:** an empty `rok-pharmacy` window that already looks like the boards.
+**Goal:** an empty `pharmacy` window that already looks like the boards.
 
 - [x] Workspace: virtual manifest, `rust-toolchain.toml`, `rustfmt.toml`, workspace lints
       (`clippy::pedantic`, `missing_docs`, `unsafe_code = "deny"`), CI running fmt, clippy,
@@ -19,7 +19,7 @@ step, in plan order, with the plan's own wording where it helps.
   - [x] `app_frame.rs`: sidebar beside the route outlet, `Page` for the top bar and the page.
   - [x] `money_text.rs`, `batch_code_text.rs`: Oxanium, thousands separators, TZS without
         decimals, expiry shortened to a month and year.
-- [x] `apps/rok-pharmacy`: `rok_ui::init`, embedded fonts, a `1440x900` window, the generated
+- [x] `apps/pharmacy`: `rok_ui::init`, embedded fonts, a `1440x900` window, the generated
       route tree, and every pharmacy route on a placeholder page.
 - [x] Spikes, each a small test or example:
   - [x] `Money` round trip with `rok_db::impl_value!`: `rok-pos-domain/src/money_postgres.rs`

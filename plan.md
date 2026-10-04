@@ -17,7 +17,7 @@ This plan builds the pharmacy desktop app first, then the medicine supplier app,
 
 - **Repository:** `ateeq1999/rok-pos`, which matches `rok-ui`, `rok-db` and `rok-ui-hooks`.
 - **Binaries:**
-  - `rok-pharmacy`: the pharmacy desktop app.
+  - `pharmacy`: the pharmacy desktop app.
   - `rok-medicine-supplier`: the supplier desktop app, from Phase 16.
 - **Crates** use the `rok-pos-` prefix, written out in full: `rok-pos-pharmacy`, not `rok-pos-pharm`.
 
@@ -50,7 +50,7 @@ rok-pos/
 │   ├── rok-pos-pharmacy/           every pharmacy screen, its queries, procedures and rules
 │   └── rok-pos-medicine-supplier/  every supplier screen (Phase 16)
 ├── apps/
-│   ├── rok-pharmacy/               main.rs, routes.rs, windows (back office, dispensary till)
+│   ├── pharmacy/                   main.rs, routes.rs, windows (back office, dispensary till)
 │   ├── rok-medicine-supplier/      main.rs, routes.rs (Phase 16)
 │   └── rok-pos-server/             Axum marketplace API between pharmacies and suppliers (Phase 15)
 ├── tools/
@@ -173,7 +173,7 @@ The app connects as a role that does not own the tables and has no `bypassrls`. 
 
 ## Phase 0 — Workspace, shell and spikes (1 week)
 
-**Goal:** an empty `rok-pharmacy` window that already looks like the boards. The four risky integrations are proven.
+**Goal:** an empty `pharmacy` window that already looks like the boards. The four risky integrations are proven.
 
 **Screens:** the frame of `design/pharmacy/PharmacyDashboard` (sidebar, top bar, empty main area).
 
@@ -185,7 +185,7 @@ The app connects as a role that does not own the tables and has no `bypassrls`. 
    - [x] `fonts.rs`: register Oxanium (numbers, codes) and Outfit (text) with `rok_ui::fonts::register_font_files`.
    - [x] `app_frame.rs`: `AppRoot` → `Sidebar` (groups and badges from `PharmacySidebar`) + `AppBar` top bar + router outlet.
    - [x] `money_text.rs`, `batch_code_text.rs`: Oxanium, thousands separators, TZS without decimals.
-3. `apps/rok-pharmacy/src/main.rs`:
+3. `apps/pharmacy/src/main.rs`:
    - [x] `Application::new().with_assets(rok_ui::Assets)`, `rok_ui::init(cx)`, register fonts, open the back-office window.
    - [x] `Router` with all pharmacy routes pointing at placeholder pages: `/`, `/prescriptions`, `/prescriptions/:prescription_id/check`, `/patients/:patient_id`, `/refills`, `/medicines`, `/batches`, `/controlled-register`, `/order`, `/receive/:order_id`, `/recalls/:recall_id`, `/claims`, `/licences`, `/till`.
 4. Spikes, each a small test or example:
@@ -278,7 +278,7 @@ The app connects as a role that does not own the tables and has no `bypassrls`. 
 
 **Tests:** installer runs twice with no changes; checksum tampering is refused; row level security checks for every new table use `#[rok_db::test]` as the non-owner role.
 
-**Done when:** `rok-pharmacy --install` on an empty database installs the eight modules in order and loads the story seed, and CI's verifier passes.
+**Done when:** `pharmacy --install` on an empty database installs the eight modules in order and loads the story seed, and CI's verifier passes.
 
 ---
 

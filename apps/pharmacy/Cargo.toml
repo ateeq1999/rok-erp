@@ -1,5 +1,5 @@
 [package]
-name = "rok-pharmacy"
+name = "pharmacy"
 description = "The Afya Pharmacy desktop app"
 version.workspace = true
 edition.workspace = true

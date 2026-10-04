@@ -62,3 +62,8 @@ jobs:
 
       - name: tests
         run: cargo test --workspace --all-features
+
+      # Every module's up migrations, every down migration, and the ups again:
+      # the schema has to build, unbuild and rebuild on a database nobody uses.
+      - name: migrations
+        run: cargo run -p migration-verifier -- --modules database/modules

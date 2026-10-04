@@ -3,8 +3,7 @@
 
 use rok_ui::prelude::*;
 use rok_ui::router::file_route;
-use rok_pos_pharmacy::screens;
-use rok_pos_shell::Page;
+use rok_pos_pharmacy::{frame, screens};
 
 file_route! { component: CheckPage }
 
@@ -12,6 +11,6 @@ file_route! { component: CheckPage }
 #[component]
 fn CheckPage(cx: &mut App) -> impl IntoElement {
     let route = params(cx);
-    Page::new("Clinical check", "Afya Pharmacy - Mwenge branch")
+    frame::titled("Clinical check")
         .child(screens::prescription_check::view(&route.prescription_id))
 }

@@ -1,0 +1,20 @@
+[package]
+name = "migration-verifier"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Builds every module's schema on a throwaway database, takes it all down, and builds it again"
+
+[[bin]]
+name = "migration-verifier"
+path = "src/main.rs"
+
+[dependencies]
+rok-db = { workspace = true, features = ["testing"] }
+rok-pos-database.workspace = true
+sqlx.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+
+[lints]
+workspace = true
