@@ -43,4 +43,33 @@ Without it they still skip rather than fail.
 
 ## Phase 1 — Database and module installer
 
-Nothing started.
+**Goal:** one command installs every module the pharmacy needs on a fresh PostgreSQL, safely
+and repeatably.
+
+- [x] Step 1: the eight modules copied from `rok-pos-database/modules` into `database/modules`.
+- [x] Step 2: the module installer, `rok-pos-database/src/module_installer.rs` - our own, not
+      `Db::migrate`, because module migrations reuse numbers such as `0001`:
+  - [x] Read every `module.toml` (serde + `toml`), sort by `depends_on`, refuse cycles.
+  - [x] Run each pending `NNNN_*.up.sql` in its own transaction with `rok_db::raw`.
+  - [x] Record it in `core.applied_migrations` with a SHA-256 checksum.
+  - [x] Refuse to start if a shipped migration's checksum changed.
+  - [x] Upsert `[[permissions]]` into `core.permissions`.
+  - [x] Write progress to `core.module_jobs.steps`.
+- [x] Step 3: `database/modules/pharmacy/migrations/0002_add_clinical_stock_and_compliance`:
+      fifteen tables plus `claim_batch_id` on `pharmacy.insurance_claims`, with its `.down.sql`,
+      and the six new permissions in `pharmacy/module.toml`.
+- [x] Step 4: rok-db models in `rok-pos-database/src/models/`, one file per table group, with
+      the `check` constraints' values as `DbEnum`s stored as text.
+- [x] Step 5: `database/seeds/afya_pharmacy_story.sql` - both branches and the staff, the
+      medicines and batches, RX-2210 to RX-2219, the controlled register at 80, UZ-7781,
+      RC-0047 and both insurance batches. It loads twice without doubling anything.
+- [x] Step 6: `tools/migration-verifier` - all ups, all downs, ups again, then a fourth round
+      that must change nothing; wired into CI after the tests.
+- [x] Step 6: `rok-pharmacy --install` - installs the eight modules in order on an empty
+      database and loads the story seed; a second run applies nothing.
+- [x] Tests: the installer runs twice with no changes; a changed migration is refused before
+      any DDL runs; every down reverses its up and re-applies; row level security is checked on
+      all fifteen new tables as `rok_pos_app`, which owns no tables and has no `BYPASSRLS`.
+
+**Phase 1 is done:** `rok-pharmacy --install` on an empty database installs the eight modules
+in order and loads the story seed, and CI's verifier passes.

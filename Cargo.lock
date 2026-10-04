@@ -3476,6 +3476,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "migration-verifier"
+version = "0.1.0"
+dependencies = [
+ "rok-db",
+ "rok-pos-database",
+ "tokio",
+]
+
+[[package]]
 name = "mime"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4832,11 +4841,14 @@ name = "rok-pharmacy"
 version = "0.1.0"
 dependencies = [
  "gpui",
+ "rok-db",
+ "rok-pos-database",
  "rok-pos-domain",
  "rok-pos-pharmacy",
  "rok-pos-shell",
  "rok-ui",
  "rok-ui-build",
+ "tokio",
 ]
 
 [[package]]
