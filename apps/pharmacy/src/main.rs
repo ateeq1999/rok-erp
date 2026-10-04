@@ -1,8 +1,8 @@
 //! The window: one frame, one route tree, and the pharmacy's theme.
 //!
 //! `pharmacy --install` never opens a window: it installs every module
-//! into the database `DATABASE_URL` names, loads the story seed and reports
-//! what it did. That is phase 1's one command.
+//! into the database `.env` or the environment names, loads the story seed
+//! and reports what it did. That is phase 1's one command.
 
 use gpui::prelude::*;
 use gpui::{Bounds, TitlebarOptions, WindowBounds, WindowOptions};
@@ -82,7 +82,20 @@ fn install(arguments: &[String]) {
     });
 }
 
+/// Read `.env` into the environment before anything asks for it.
+///
+/// dotenvy looks in the working directory and then its parents, and a name
+/// already set in the environment wins over the file, so
+/// `DATABASE_URL=... pharmacy --install` still overrides it. A missing `.env`
+/// is not an error: the environment on its own is enough.
+fn load_environment() {
+    if let Ok(path) = dotenvy::dotenv() {
+        println!("using {}", path.display());
+    }
+}
+
 fn main() {
+    load_environment();
     let arguments: Vec<String> = std::env::args().skip(1).collect();
     if arguments.iter().any(|argument| argument == "--install") {
         install(&arguments);

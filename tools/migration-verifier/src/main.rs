@@ -6,8 +6,9 @@
 //! finds out about until a customer's upgrade has to be undone, so the pair is
 //! exercised on a throwaway database in CI rather than in anger.
 //!
-//! It runs against a database of its own on the server `DATABASE_URL` names
-//! and drops it afterwards, so it can never touch development data:
+//! It runs against a database of its own on the server `.env` or
+//! `DATABASE_URL` names and drops it afterwards, so it can never touch
+//! development data:
 //!
 //! ```text
 //! cargo run -p migration-verifier
@@ -41,8 +42,21 @@ async fn install(installer: &ModuleInstaller, db: &rok_db::Db) -> Round {
     }
 }
 
+/// Read `.env` into the environment before the verifier asks for
+/// `DATABASE_URL`.
+///
+/// dotenvy looks in the working directory and then its parents, and a name
+/// already set in the environment wins over the file. A missing `.env` is not
+/// an error: CI sets `DATABASE_URL` itself.
+fn load_environment() {
+    if let Ok(path) = dotenvy::dotenv() {
+        println!("using {}", path.display());
+    }
+}
+
 #[tokio::main]
 async fn main() {
+    load_environment();
     let installer = ModuleInstaller::load(&default_modules_directory())
         .expect("every module.toml reads and orders itself");
 

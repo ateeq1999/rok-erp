@@ -8,6 +8,7 @@ license.workspace = true
 publish = false
 
 [dependencies]
+dotenvy.workspace = true
 rok-db.workspace = true
 rok-pos-database.path = "../../crates/rok-pos-database"
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
