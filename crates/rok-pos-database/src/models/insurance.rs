@@ -1,59 +1,58 @@
-//! A month of claims to one insurer, sent and paid as one batch.
+//! The monthly batches a pharmacy submits to an insurer, and how much of each
+//! batch was paid, queried or deducted.
 
 use chrono::{DateTime, NaiveDate, Utc};
 use rok_db::{DbEnum, Model};
 use rok_pos_domain::Money;
 use uuid::Uuid;
 
-use crate::models::all_values;
-
-/// Where a claim batch has got to.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, DbEnum)]
+/// Where a monthly batch has got to, matching the `status` check constraint.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum)]
 pub enum ClaimBatchStatus {
-    /// Claims are still being added.
+    /// Open for the period: October builds as sales happen.
     Open,
-    /// Sent to the insurer.
+    /// Sent to the insurer with a total.
     Submitted,
-    /// The insurer queried some of its claims.
+    /// The insurer has queried part of it and wants fixes.
     Queried,
-    /// Paid.
+    /// The insurer has paid, with deductions recorded.
     Paid,
 }
-all_values!(ClaimBatchStatus: Open, Submitted, Queried, Paid);
 
-/// One insurer's claims for one period: `pharmacy.insurance_claim_batches`.
+/// A month's claims to one insurer, submitted together and matched to
+/// payment. September's batch on the board is 214 claims and 4,862,300.
 #[derive(Debug, Clone, PartialEq, Model)]
 #[rok(table = "pharmacy.insurance_claim_batches", timestamps, soft_delete)]
 pub struct InsuranceClaimBatch {
-    /// The row's key.
+    /// The row's identity.
     #[rok(primary_key, generated)]
     pub id: Uuid,
-    /// The business it belongs to.
+    /// The business this batch belongs to.
     #[rok(tenant)]
     pub organization_id: Uuid,
-    /// The insurer.
+    /// Who the claims go to.
     pub insurance_provider_id: Uuid,
-    /// The first day it covers.
+    /// The first day of the period.
     pub period_start_on: NaiveDate,
-    /// The last day it covers.
+    /// The last day of the period.
     pub period_end_on: NaiveDate,
-    /// Where it has got to.
+    /// Where the batch has got to.
     pub status: ClaimBatchStatus,
-    /// When it was sent.
+    /// When it went to the insurer: 30 Sep for September's batch.
     pub submitted_at: Option<DateTime<Utc>>,
-    /// What was claimed.
+    /// What was claimed across the batch.
     pub claimed_amount: Money,
-    /// What the insurer paid.
+    /// What the insurer paid against it.
     pub paid_amount: Money,
-    /// What the insurer held back.
+    /// What the insurer kept back, which payment matching fills in.
     pub deducted_amount: Money,
     /// When the row was created.
     pub created_at: DateTime<Utc>,
-    /// When it last changed.
+    /// When the row last changed.
     pub updated_at: DateTime<Utc>,
-    /// When it was deleted, if it was.
+    /// When the row was removed, if it was.
     pub deleted_at: Option<DateTime<Utc>>,
-    /// Bumped on every change.
+    /// The optimistic lock.
     #[rok(version)]
     pub row_version: i64,
 }

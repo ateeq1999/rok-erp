@@ -1,217 +1,261 @@
-//! The pharmacist's check on a prescription: the interaction rules it runs
-//! against, the checks recorded, the calls to the prescriber, and the labels
-//! printed.
+//! The patient's record and the checks a pharmacist works through before a
+//! prescription is approved: profiles, notes, interaction rules, the recorded
+//! checks and the calls to the prescriber.
 
 use chrono::{DateTime, NaiveDate, Utc};
 use rok_db::{DbEnum, Model};
 use uuid::Uuid;
 
-use crate::models::all_values;
+/// The patient's sex as recorded, matching the `sex` check constraint.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum)]
+pub enum Sex {
+    /// Female.
+    Female,
+    /// Male.
+    Male,
+    /// Another value the patient gave.
+    Other,
+    /// Not known, which is its own answer on a clinical record.
+    Unknown,
+}
 
-/// How much an interaction matters.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, DbEnum)]
+/// How badly two medicines clash, matching the `severity` check constraint.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum)]
 pub enum InteractionSeverity {
-    /// Worth knowing.
+    /// Worth knowing; nothing is stopped.
     Information,
-    /// Check with the prescriber or counsel the patient.
+    /// The pharmacist should think before dispensing.
     Caution,
-    /// Do not dispense without the prescriber.
+    /// The pair is dangerous and must not leave the counter together.
     Serious,
 }
-all_values!(InteractionSeverity: Information, Caution, Serious);
 
-/// What a prescription check looked at.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, DbEnum)]
-pub enum PrescriptionCheckKey {
-    /// The prescription is for this patient.
+/// Which check on a prescription this row records, matching the `check_key`
+/// check constraint.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum)]
+pub enum CheckKey {
+    /// Is this the person the prescription was written for?
     Identity,
-    /// Nothing on it is something they are allergic to.
+    /// Does the patient have an allergy to any line?
     Allergy,
-    /// No two medicines interact.
+    /// Do the lines clash with each other or with the patient's record?
     Interaction,
-    /// No two medicines do the same job.
+    /// Is the same therapy already prescribed elsewhere?
     DuplicateTherapy,
-    /// Every dose is in range.
+    /// Is each dose inside the safe range for the patient?
     DoseRange,
-    /// The insurer covers it.
+    /// Does the insurer cover the lines?
     InsuranceCover,
 }
-all_values!(
-    PrescriptionCheckKey: Identity,
-    Allergy,
-    Interaction,
-    DuplicateTherapy,
-    DoseRange,
-    InsuranceCover,
-);
 
-/// How a check came out, on a prescription or a delivery.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, DbEnum)]
+/// How a check came out, matching the `result` check constraint.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum)]
 pub enum CheckResult {
-    /// Nothing to act on.
+    /// Nothing to report.
     Passed,
-    /// The pharmacist has to decide.
+    /// Something to look at, but dispensing may go ahead.
     Warning,
-    /// Stop.
+    /// Something that must be resolved first.
     Failed,
 }
-all_values!(CheckResult: Passed, Warning, Failed);
 
-/// How the prescriber was reached.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, DbEnum)]
+/// How the prescriber was reached, matching the `contact_method` check
+/// constraint.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum)]
 pub enum ContactMethod {
-    /// A phone call.
+    /// A call.
     Phone,
     /// A text message.
-    TextMessage,
-    /// An email.
-    Email,
-    /// In person.
+    Sms,
+    /// A `WhatsApp` message, which is how most prescribers in the story reply.
+    Whatsapp,
+    /// The prescriber walked in.
     InPerson,
 }
-all_values!(ContactMethod: Phone, TextMessage, Email, InPerson);
 
-/// What the prescriber said.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, DbEnum)]
+/// What came of the call, matching the `outcome` check constraint.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum)]
 pub enum ContactOutcome {
-    /// Dispense as written.
+    /// The prescriber confirmed the prescription as written.
     PrescriberAgreed,
-    /// The prescription was changed.
+    /// The prescriber changed it, which starts the checks again.
     PrescriptionChanged,
-    /// Nobody answered.
+    /// Nobody answered; the pharmacy tries again.
     NoAnswer,
 }
-all_values!(ContactOutcome: PrescriberAgreed, PrescriptionChanged, NoAnswer);
 
-/// Two generic medicines that interact, from a reference source a pharmacist
-/// reviewed: `pharmacy.interaction_rules`.
+/// What a pharmacist needs to know about a patient before dispensing.
+#[derive(Debug, Clone, PartialEq, Model)]
+#[rok(table = "pharmacy.patient_clinical_profiles", timestamps, soft_delete)]
+pub struct PatientClinicalProfile {
+    /// The row's identity.
+    #[rok(primary_key, generated)]
+    pub id: Uuid,
+    /// The business this record belongs to.
+    #[rok(tenant)]
+    pub organization_id: Uuid,
+    /// The customer this profile describes, one per customer.
+    pub customer_id: Uuid,
+    /// The date of birth, for the age behind a dose range.
+    pub date_of_birth: Option<NaiveDate>,
+    /// The sex recorded on the file.
+    pub sex: Option<Sex>,
+    /// What the patient reacts to, checked against every line.
+    pub allergies: Vec<String>,
+    /// Conditions as earlier prescriptions spelled them, for the duplicate
+    /// therapy check.
+    pub conditions_from_prescriptions: Vec<String>,
+    /// Who insures the patient, if anyone.
+    pub insurance_provider_id: Option<Uuid>,
+    /// The member number as the card prints it.
+    pub insurance_member_number: Option<String>,
+    /// Whether the pharmacy may send refill reminders.
+    pub reminder_consent: bool,
+    /// When that consent was given; required by a check once consent is on.
+    pub reminder_consent_given_at: Option<DateTime<Utc>>,
+    /// When the row was created.
+    pub created_at: DateTime<Utc>,
+    /// When the row last changed.
+    pub updated_at: DateTime<Utc>,
+    /// When the row was removed, if it was.
+    pub deleted_at: Option<DateTime<Utc>>,
+    /// The optimistic lock.
+    #[rok(version)]
+    pub row_version: i64,
+}
+
+/// A note about a patient's care. Readable only with
+/// `pharmacy.clinical_notes.view`, because a clinical note is not stock
+/// control.
+#[derive(Debug, Clone, PartialEq, Model)]
+#[rok(table = "pharmacy.clinical_notes", timestamps, soft_delete)]
+pub struct ClinicalNote {
+    /// The row's identity.
+    #[rok(primary_key, generated)]
+    pub id: Uuid,
+    /// The business this note belongs to.
+    #[rok(tenant)]
+    pub organization_id: Uuid,
+    /// The patient the note is about.
+    pub customer_id: Uuid,
+    /// The prescription that prompted it, when there was one.
+    pub prescription_id: Option<Uuid>,
+    /// what the note says.
+    pub note_text: String,
+    /// The pharmacist who wrote it.
+    pub written_by_user_id: Uuid,
+    /// When the row was created.
+    pub created_at: DateTime<Utc>,
+    /// When the row last changed.
+    pub updated_at: DateTime<Utc>,
+    /// When the row was removed, if it was.
+    pub deleted_at: Option<DateTime<Utc>>,
+    /// The optimistic lock.
+    #[rok(version)]
+    pub row_version: i64,
+}
+
+/// The interaction rule table. Rows are loaded from a reference source the
+/// pharmacy has the right to use and reviewed by a pharmacist; the app never
+/// invents a rule.
 #[derive(Debug, Clone, PartialEq, Model)]
 #[rok(table = "pharmacy.interaction_rules", timestamps, soft_delete)]
 pub struct InteractionRule {
-    /// The row's key.
+    /// The row's identity.
     #[rok(primary_key, generated)]
     pub id: Uuid,
-    /// The business it belongs to.
+    /// The business this rule belongs to.
     #[rok(tenant)]
     pub organization_id: Uuid,
-    /// One generic name.
+    /// The first generic, in whichever order the pair is read.
     pub first_generic_name: String,
-    /// The other.
+    /// The second generic.
     pub second_generic_name: String,
-    /// How much it matters.
+    /// How badly the pair clashes.
     pub severity: InteractionSeverity,
-    /// What the alert says.
+    /// What the pharmacist is told, and why.
     pub message_text: String,
-    /// Where the rule comes from; every alert names it.
-    pub source_reference: Option<String>,
-    /// The pharmacist who reviewed it.
+    /// Where the rule came from, which the board shows beside it.
+    pub source_reference: String,
+    /// The pharmacist who signed the rule off.
     pub reviewed_by_user_id: Option<Uuid>,
-    /// When they did.
+    /// When they signed it off.
     pub reviewed_on: Option<NaiveDate>,
+    /// Whether the rule is in force; a withdrawn rule is kept, not deleted.
+    pub is_active: bool,
     /// When the row was created.
     pub created_at: DateTime<Utc>,
-    /// When it last changed.
+    /// When the row last changed.
     pub updated_at: DateTime<Utc>,
-    /// When it was deleted, if it was.
+    /// When the row was removed, if it was.
     pub deleted_at: Option<DateTime<Utc>>,
-    /// Bumped on every change.
+    /// The optimistic lock.
     #[rok(version)]
     pub row_version: i64,
 }
 
-/// One check recorded against a prescription: `pharmacy.prescription_checks`.
+/// Every check a pharmacist works through before approving a prescription,
+/// one row per check, unique per prescription.
 #[derive(Debug, Clone, PartialEq, Model)]
 #[rok(table = "pharmacy.prescription_checks", timestamps, soft_delete)]
 pub struct PrescriptionCheck {
-    /// The row's key.
+    /// The row's identity.
     #[rok(primary_key, generated)]
     pub id: Uuid,
-    /// The business it belongs to.
+    /// The business this check belongs to.
     #[rok(tenant)]
     pub organization_id: Uuid,
-    /// The prescription checked.
+    /// The prescription being checked.
     pub prescription_id: Uuid,
-    /// What was checked.
-    pub check_key: PrescriptionCheckKey,
+    /// Which of the six checks this row records.
+    pub check_key: CheckKey,
     /// How it came out.
     pub result: CheckResult,
-    /// What was found.
+    /// What was found, in the words the pharmacist reads at the counter.
     pub details: Option<String>,
-    /// Who checked.
-    pub checked_by_user_id: Option<Uuid>,
+    /// The pharmacist who worked through it.
+    pub checked_by_user_id: Uuid,
     /// When the row was created.
     pub created_at: DateTime<Utc>,
-    /// When it last changed.
+    /// When the row last changed.
     pub updated_at: DateTime<Utc>,
-    /// When it was deleted, if it was.
+    /// When the row was removed, if it was.
     pub deleted_at: Option<DateTime<Utc>>,
-    /// Bumped on every change.
+    /// The optimistic lock.
     #[rok(version)]
     pub row_version: i64,
 }
 
-/// A call to the prescriber about a prescription:
-/// `pharmacy.prescriber_contacts`.
+/// The call to the prescriber when something on a prescription needs
+/// confirming.
 #[derive(Debug, Clone, PartialEq, Model)]
 #[rok(table = "pharmacy.prescriber_contacts", timestamps, soft_delete)]
 pub struct PrescriberContact {
-    /// The row's key.
+    /// The row's identity.
     #[rok(primary_key, generated)]
     pub id: Uuid,
-    /// The business it belongs to.
+    /// The business this contact belongs to.
     #[rok(tenant)]
     pub organization_id: Uuid,
-    /// The prescription it was about.
+    /// The prescription that needed confirming.
     pub prescription_id: Uuid,
-    /// When the prescriber was reached.
+    /// When the pharmacy reached out.
     pub contacted_at: DateTime<Utc>,
-    /// How.
+    /// How they reached the prescriber.
     pub contact_method: ContactMethod,
-    /// What they said.
+    /// What came of it.
     pub outcome: ContactOutcome,
-    /// Anything else worth keeping.
+    /// What was agreed, which the record keeps after the call.
     pub note_text: Option<String>,
-    /// Who made the call.
-    pub recorded_by_user_id: Option<Uuid>,
+    /// The staff member who made the call.
+    pub recorded_by_user_id: Uuid,
     /// When the row was created.
     pub created_at: DateTime<Utc>,
-    /// When it last changed.
+    /// When the row last changed.
     pub updated_at: DateTime<Utc>,
-    /// When it was deleted, if it was.
+    /// When the row was removed, if it was.
     pub deleted_at: Option<DateTime<Utc>>,
-    /// Bumped on every change.
-    #[rok(version)]
-    pub row_version: i64,
-}
-
-/// A dosage label printed for one prescription item:
-/// `pharmacy.dispensing_labels`.
-#[derive(Debug, Clone, PartialEq, Model)]
-#[rok(table = "pharmacy.dispensing_labels", timestamps, soft_delete)]
-pub struct DispensingLabel {
-    /// The row's key.
-    #[rok(primary_key, generated)]
-    pub id: Uuid,
-    /// The business it belongs to.
-    #[rok(tenant)]
-    pub organization_id: Uuid,
-    /// The prescription item it labels.
-    pub prescription_item_id: Uuid,
-    /// The words on the label.
-    pub label_text: String,
-    /// When it was first printed.
-    pub printed_at: DateTime<Utc>,
-    /// Who printed it.
-    pub printed_by_user_id: Option<Uuid>,
-    /// How many times it was printed again.
-    pub reprint_count: i32,
-    /// When the row was created.
-    pub created_at: DateTime<Utc>,
-    /// When it last changed.
-    pub updated_at: DateTime<Utc>,
-    /// When it was deleted, if it was.
-    pub deleted_at: Option<DateTime<Utc>>,
-    /// Bumped on every change.
+    /// The optimistic lock.
     #[rok(version)]
     pub row_version: i64,
 }

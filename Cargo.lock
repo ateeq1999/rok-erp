@@ -3481,7 +3481,6 @@ version = "0.1.0"
 dependencies = [
  "rok-db",
  "rok-pos-database",
- "sqlx",
  "tokio",
 ]
 
@@ -4087,11 +4086,14 @@ name = "pharmacy"
 version = "0.1.0"
 dependencies = [
  "gpui",
+ "rok-db",
+ "rok-pos-database",
  "rok-pos-domain",
  "rok-pos-pharmacy",
  "rok-pos-shell",
  "rok-ui",
  "rok-ui-build",
+ "tokio",
 ]
 
 [[package]]
@@ -4861,6 +4863,7 @@ dependencies = [
  "serde_json",
  "sha2 0.10.9",
  "sqlx",
+ "thiserror 2.0.21",
  "tokio",
  "toml 0.8.23",
  "uuid",

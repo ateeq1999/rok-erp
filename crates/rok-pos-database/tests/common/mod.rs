@@ -4,7 +4,7 @@
 use std::path::PathBuf;
 
 use rok_db::{Db, raw};
-use rok_pos_database::{BusinessSession, InstallRequest, install};
+use rok_pos_database::{BusinessSession, ModuleInstaller};
 use uuid::Uuid;
 
 /// The role the app connects as: it owns no tables and has no `BYPASSRLS`.
@@ -71,16 +71,16 @@ pub fn session_for(organization_id: Uuid) -> BusinessSession {
     BusinessSession::new(organization_id, Uuid::now_v7(), Uuid::now_v7(), "Grace N.")
 }
 
-/// Install pharmacy and everything it depends on, without job rows.
+/// Install pharmacy and everything it depends on, the way `pharmacy --install`
+/// does: every module in dependency order, each pending migration in its own
+/// transaction.
 pub async fn install_pharmacy_stack(db: &Db) {
-    install(
-        db,
-        &InstallRequest::all(modules_root())
-            .only(&["pharmacy"])
-            .without_jobs(),
-    )
-    .await
-    .expect("the pharmacy stack installs");
+    let installer =
+        ModuleInstaller::load(&modules_root()).expect("every module.toml reads and orders itself");
+    installer
+        .install(db)
+        .await
+        .expect("the pharmacy stack installs");
 }
 
 /// Give the app role what it needs to read and write the pharmacy tables. A

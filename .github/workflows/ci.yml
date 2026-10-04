@@ -63,7 +63,9 @@ jobs:
       - name: tests
         run: cargo test --workspace --all-features
 
-      # Every module's up migrations, every down migration, and the ups again:
-      # the schema has to build, unbuild and rebuild on a database nobody uses.
-      - name: migrations
-        run: cargo run -p migration-verifier -- --modules database/modules
+      # Phase 1 step 6: every up migration, then every down migration, then
+      # the ups again, on a throwaway database. A down migration that does
+      # not reverse its up one fails the build here rather than in a
+      # customer's upgrade.
+      - name: migration verifier
+        run: cargo run -p migration-verifier

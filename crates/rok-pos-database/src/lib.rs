@@ -1,17 +1,10 @@
-//! PostgreSQL access for rok POS: business sessions, the module installer, and
-//! the models the screens read.
+//! PostgreSQL access for rok POS: business sessions, and the models the screens
+//! read.
 //!
-//! Two things live here that belong to no screen.
-//!
-//! [`business_session`] is how every query says which business it is for: the
+//! The one thing that lives here and belongs to no screen is
+//! [`business_session`]: how every query says which business it is for. The
 //! tenant filter sets `app.organization_id`, the transaction sets
 //! `app.user_id`, and row level security catches whatever either one misses.
-//!
-//! [`module_installer`] is how the database itself is built: one command reads
-//! every `database/modules/<key>/module.toml`, puts the modules in dependency
-//! order, and runs each module's pending migrations, recording a checksum for
-//! every one so a migration that has already run can never change underneath
-//! the databases that ran it.
 //!
 //! ```
 //! use uuid::Uuid;
@@ -25,10 +18,14 @@
 //! ```
 
 pub mod business_session;
+pub mod models;
 pub mod module_installer;
 pub mod module_manifest;
-pub mod models;
 
 pub use business_session::{BusinessSession, in_business};
-pub use module_installer::{InstallReport, InstallRequest, install, revert_all};
-pub use module_manifest::{ModuleError, ModuleManifest, ModuleSource};
+pub use module_installer::{
+    InstallError, InstallReport, LoadedModule, MigrationFile, ModuleInstaller, ModuleManifest,
+    ModuleReport, PermissionEntry, default_modules_directory, default_story_seed_path,
+    load_afya_story, load_sql_file,
+};
+pub use module_manifest::{ModuleError, ModuleSource};

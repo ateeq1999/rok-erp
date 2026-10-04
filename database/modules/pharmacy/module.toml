@@ -6,7 +6,7 @@ schema = "pharmacy"
 category = "industry_pack"
 description = "Prescriptions and prescribers, batch-tracked dispensing, the controlled substance register and insurance claims."
 business_types = ["pharmacy", "duka_la_dawa", "agrovet", "clinic_dispensary"]
-depends_on = ["core", "catalog", "inventory", "customers", "point_of_sale", "purchasing"]
+depends_on = ["core", "catalog", "inventory", "customers", "point_of_sale"]
 optional_depends_on = ["accounting", "ai_assistant"]
 can_be_uninstalled = true
 
@@ -40,29 +40,31 @@ risk_level = "money"
 
 [[permissions]]
 key = "pharmacy.clinical_check.approve"
-description = "Dispense a prescription that failed a clinical check, or change a check result"
+description = "Approve a prescription check so it can be dispensed"
 risk_level = "sensitive"
 
 [[permissions]]
 key = "pharmacy.clinical_notes.view"
-description = "Read clinical notes and patient clinical profiles"
+description = "Read patients' clinical notes"
+risk_level = "sensitive"
 
 [[permissions]]
 key = "pharmacy.recalls.manage"
-description = "Record recalls, quarantine batches and record what was done about them"
+description = "Enter recall notices and record the steps taken"
 risk_level = "sensitive"
 
 [[permissions]]
 key = "pharmacy.licences.manage"
-description = "Keep the branch licences and certificates up to date"
+description = "Keep licences and inspection documents up to date"
 
 [[permissions]]
 key = "pharmacy.temperature_logs.record"
-description = "Record fridge and cold chain temperatures"
+description = "Record fridge and cold cabinet temperatures"
 
 [[permissions]]
 key = "pharmacy.interaction_rules.manage"
-description = "Add and review drug interaction rules"
+description = "Load and review the interaction rule table"
+risk_level = "sensitive"
 
 [[pages]]
 page_key = "pharmacy_prescriptions"

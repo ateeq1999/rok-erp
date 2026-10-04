@@ -1,20 +1,16 @@
 [package]
 name = "migration-verifier"
+description = "Applies every module's up migrations, then every down, then the ups again"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-description = "Builds every module's schema on a throwaway database, takes it all down, and builds it again"
-
-[[bin]]
-name = "migration-verifier"
-path = "src/main.rs"
+publish = false
 
 [dependencies]
-rok-db = { workspace = true, features = ["testing"] }
-rok-pos-database.workspace = true
-sqlx.workspace = true
-tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+rok-db.workspace = true
+rok-pos-database.path = "../../crates/rok-pos-database"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
 [lints]
 workspace = true

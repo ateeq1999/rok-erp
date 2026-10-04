@@ -124,6 +124,55 @@ pub struct DashboardFigures {
     pub other_branch: OtherBranch,
 }
 
+/// The five cards the board shows, in the order it shows them.
+///
+/// They are the story's alerts rather than its figures, so they live apart and
+/// [`DashboardFigures::story`] picks them up.
+fn story_tasks() -> Vec<Task> {
+    vec![
+        Task {
+            kind: "Recall",
+            tone: Tone::Danger,
+            title: "Recall RC-0047 \u{b7} Amoxicillin 250mg/5ml, batch AMS-2404",
+            detail: "14 bottles quarantined \u{b7} 2 of 5 patients still to reach",
+            href: "/recalls/RC-0047",
+            action: "Open recall",
+        },
+        Task {
+            kind: "Check",
+            tone: Tone::Warning,
+            title: "RX-2214 \u{b7} Mzee Salim R. \u{b7} interaction check",
+            detail: "Metronidazole with warfarin may increase bleeding risk. Contact the prescriber.",
+            href: "/prescriptions/RX-2214/check",
+            action: "Review",
+        },
+        Task {
+            kind: "Delivery",
+            tone: Tone::Info,
+            title: "Delivery UZ-7781 arrived from Uzima Pharmaceuticals",
+            detail: "Arrived 11:20 \u{b7} 6 lines \u{b7} insulin in cold box \u{b7} count and check batches",
+            href: "/receive/UZ-7781",
+            action: "Receive",
+        },
+        Task {
+            kind: "Licence",
+            tone: Tone::Warning,
+            title: "Premises licence renewal due in 57 days",
+            detail: "Pharmacy Council \u{b7} expires 30 Nov 2026 \u{b7} submit by 28 Nov",
+            href: "/licences",
+            action: "Start renewal",
+        },
+        Task {
+            kind: "Done",
+            tone: Tone::Success,
+            title: "Controlled count done 08:15",
+            detail: "Tramadol 50mg and 5 other lines counted by Grace N. \u{b7} no difference",
+            href: "/controlled-register",
+            action: "View register",
+        },
+    ]
+}
+
 impl DashboardFigures {
     /// The board's figures for Mwenge branch at 15:30.
     #[must_use]
@@ -170,48 +219,7 @@ impl DashboardFigures {
             claims_queried: 11,
             claims_queried_in: "National health insurance \u{b7} September batch",
             average_basket: tzs(18_600),
-            tasks: vec![
-                Task {
-                    kind: "Recall",
-                    tone: Tone::Danger,
-                    title: "Recall RC-0047 \u{b7} Amoxicillin 250mg/5ml, batch AMS-2404",
-                    detail: "14 bottles quarantined \u{b7} 2 of 5 patients still to reach",
-                    href: "/recalls/RC-0047",
-                    action: "Open recall",
-                },
-                Task {
-                    kind: "Check",
-                    tone: Tone::Warning,
-                    title: "RX-2214 \u{b7} Mzee Salim R. \u{b7} interaction check",
-                    detail: "Metronidazole with warfarin may increase bleeding risk. Contact the prescriber.",
-                    href: "/prescriptions/RX-2214/check",
-                    action: "Review",
-                },
-                Task {
-                    kind: "Delivery",
-                    tone: Tone::Info,
-                    title: "Delivery UZ-7781 arrived from Uzima Pharmaceuticals",
-                    detail: "Arrived 11:20 \u{b7} 6 lines \u{b7} insulin in cold box \u{b7} count and check batches",
-                    href: "/receive/UZ-7781",
-                    action: "Receive",
-                },
-                Task {
-                    kind: "Licence",
-                    tone: Tone::Warning,
-                    title: "Premises licence renewal due in 57 days",
-                    detail: "Pharmacy Council \u{b7} expires 30 Nov 2026 \u{b7} submit by 28 Nov",
-                    href: "/licences",
-                    action: "Start renewal",
-                },
-                Task {
-                    kind: "Done",
-                    tone: Tone::Success,
-                    title: "Controlled count done 08:15",
-                    detail: "Tramadol 50mg and 5 other lines counted by Grace N. \u{b7} no difference",
-                    href: "/controlled-register",
-                    action: "View register",
-                },
-            ],
+            tasks: story_tasks(),
             top_medicines: [
                 ("Paracetamol 500mg tablets", "640 tabs", 32_000),
                 ("Amoxicillin 500mg capsules", "231 caps", 46_200),

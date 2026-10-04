@@ -1,73 +1,35 @@
-//! rok-db models for the pharmacy module's second migration, one file per
-//! group of tables.
+//! The models the pharmacy's clinical, stock and compliance screens read and
+//! write: the fifteen tables migration `0002_add_clinical_stock_and_compliance`
+//! adds to the `pharmacy` schema.
 //!
-//! Every model is scoped to its business with `#[rok(tenant)]`, so a query
-//! made inside [`crate::in_business`] only ever sees that business's rows, and
-//! row level security catches whatever the filter misses. Every status column
-//! is a [`rok_db::DbEnum`] stored as text, with exactly the values the
-//! migration's `check` constraint allows.
+//! One file per table group, mirroring the way the boards group the work. The
+//! closed sets of values a column allows are [`rok_db::DbEnum`]s stored as
+//! text, spelled exactly as the `check` constraints spell them, so a status the
+//! database would reject is a compile error here instead of a runtime surprise.
 //!
-//! ```
-//! use rok_pos_database::models::{CheckResult, MedicineSchedule};
-//!
-//! assert_eq!(MedicineSchedule::PrescriptionOnly.as_str(), "prescription_only");
-//! assert_eq!("warning".parse::<CheckResult>().ok(), Some(CheckResult::Warning));
-//! ```
+//! Every table follows the module conventions: a UUID version 7 primary key, an
+//! `organization_id` marked [`rok(tenant)`](rok_db::Model) so a session sees its
+//! own business's rows, `created_at`/`updated_at`, a soft `deleted_at` and a
+//! `row_version` for optimistic locking.
 
 pub mod clinical;
 pub mod compliance;
+pub mod dispensing;
 pub mod insurance;
-pub mod medicines;
-pub mod patients;
-pub mod stock;
-
-use rok_db::DbNewtype;
-use rust_decimal::Decimal;
+pub mod medicine;
+pub mod numeric;
 
 pub use clinical::{
-    CheckResult, ContactMethod, ContactOutcome, DispensingLabel, InteractionRule,
-    InteractionSeverity, PrescriberContact, PrescriptionCheck, PrescriptionCheckKey,
+    CheckKey, CheckResult, ClinicalNote, ContactMethod, ContactOutcome, InteractionRule,
+    InteractionSeverity, PatientClinicalProfile, PrescriberContact, PrescriptionCheck, Sex,
 };
-pub use compliance::{LicenceDocument, LicenceType};
+pub use compliance::{
+    LicenceDocument, LicenceType, RecallAction, RecallActionType, RecallClass, RecallNotice,
+    RecallStatus, ReceiptCheckKey, ReceiptQualityCheck,
+};
+pub use dispensing::{DispensingLabel, RefillReminderStatus, RefillSchedule, TemperatureLog};
 pub use insurance::{ClaimBatchStatus, InsuranceClaimBatch};
-pub use medicines::{
+pub use medicine::{
     MedicineDetails, MedicineSchedule, MedicineSubstitute, StorageCondition, SubstitutionKind,
 };
-pub use patients::{ClinicalNote, PatientClinicalProfile, RefillSchedule, ReminderStatus, Sex};
-pub use stock::{
-    ReceiptCheckKey, ReceiptQualityCheck, RecallAction, RecallActionType, RecallClass,
-    RecallNotice, RecallStatus, TemperatureLog,
-};
-
-/// A temperature in degrees Celsius, as a `numeric(5,2)` column keeps it.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, DbNewtype)]
-pub struct Celsius(pub Decimal);
-
-/// A count of units that may be fractional, as a `numeric(18,3)` column keeps
-/// it: 14 bottles, or 2.5 strips.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, DbNewtype)]
-pub struct Quantity(pub Decimal);
-
-/// Every value of a status enum, so a test can hold it against the migration's
-/// `check` constraint.
-pub trait AllValues: Sized + 'static {
-    /// Every variant, in declaration order.
-    const ALL: &'static [Self];
-
-    /// The text the database stores for this variant.
-    fn stored(&self) -> &'static str;
-}
-
-/// Implement [`AllValues`] for a `DbEnum` from its variants.
-macro_rules! all_values {
-    ($name:ident: $($variant:ident),+ $(,)?) => {
-        impl $crate::models::AllValues for $name {
-            const ALL: &'static [Self] = &[$($name::$variant),+];
-
-            fn stored(&self) -> &'static str {
-                self.as_str()
-            }
-        }
-    };
-}
-pub(crate) use all_values;
+pub use numeric::{Quantity, Temperature};

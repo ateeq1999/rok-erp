@@ -206,12 +206,12 @@ The app connects as a role that does not own the tables and has no `bypassrls`. 
 
 1. Copy `rok-pos-database/modules` into `database/modules`.
 2. The module installer in `rok-pos-database/src/module_installer.rs` is our own, not `Db::migrate`. sqlx's migrator keeps one version list per database, and module migrations reuse numbers such as `0001`.
-   - [ ] Read every `module.toml` (serde + `toml`), sort by `depends_on`, refuse cycles.
-   - [ ] Run each pending `NNNN_*.up.sql` in its own transaction with `rok_db::raw`.
-   - [ ] Record it in `core.applied_migrations` with a SHA-256 checksum.
-   - [ ] Refuse to start if a shipped migration's checksum changed.
-   - [ ] Upsert `[[permissions]]` into `core.permissions`.
-   - [ ] Write progress to `core.module_jobs.steps`. The install screen (Phase 2) shows it.
+   - [x] Read every `module.toml` (serde + `toml`), sort by `depends_on`, refuse cycles.
+   - [x] Run each pending `NNNN_*.up.sql` in its own transaction with `rok_db::raw`.
+   - [x] Record it in `core.applied_migrations` with a SHA-256 checksum.
+   - [x] Refuse to start if a shipped migration's checksum changed.
+   - [x] Upsert `[[permissions]]` into `core.permissions`.
+   - [x] Write progress to `core.module_jobs.steps`. The install screen (Phase 2) shows it.
 3. New migration `database/modules/pharmacy/migrations/0002_add_clinical_stock_and_compliance.up.sql`, with its `.down.sql`. Same conventions as every module: UUID version 7 keys, `organization_id`, timestamps, `row_version`, `core.prepare_table(..)`.
 
    | Table                                | Purpose and key columns                                                                                                                                                                                                                                                                                                                                                                                                                          |

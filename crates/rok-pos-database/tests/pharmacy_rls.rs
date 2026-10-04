@@ -81,23 +81,28 @@ async fn seed_every_new_table(db: &Db, business: &Business, suffix: &str) {
     seed!(
         db,
         "insert into pharmacy.patient_clinical_profiles \
-             (organization_id, customer_id, allergies, reminder_consent) \
-         values (?, ?, array['penicillin'], true)",
+             (organization_id, customer_id, allergies, reminder_consent, \
+              reminder_consent_given_at) \
+         values (?, ?, array['penicillin'], true, now())",
         organization_id,
         customer
     );
     seed!(
         db,
-        "insert into pharmacy.clinical_notes (organization_id, customer_id, note_text) \
-         values (?, ?, 'Penicillin rash in 2019')",
+        "insert into pharmacy.clinical_notes \
+             (organization_id, customer_id, note_text, written_by_user_id) \
+         values (?, ?, 'Penicillin rash in 2019', ?)",
         organization_id,
-        customer
+        customer,
+        business.user_id
     );
     seed!(
         db,
         "insert into pharmacy.interaction_rules \
-             (organization_id, first_generic_name, second_generic_name, severity, message_text) \
-         values (?, 'Amoxicillin', 'Warfarin', 'caution', 'Monitor the INR')",
+             (organization_id, first_generic_name, second_generic_name, severity, \
+              message_text, source_reference) \
+         values (?, 'Amoxicillin', 'Warfarin', 'caution', 'Monitor the INR', \
+                 'WHO Essential Medicines List')",
         organization_id
     );
     seed!(
@@ -112,10 +117,12 @@ async fn seed_every_new_table(db: &Db, business: &Business, suffix: &str) {
     seed!(
         db,
         "insert into pharmacy.prescriber_contacts \
-             (organization_id, prescription_id, contact_method, outcome, note_text) \
-         values (?, ?, 'phone', 'prescription_changed', 'Dose halved')",
+             (organization_id, prescription_id, contact_method, outcome, note_text, \
+              recorded_by_user_id) \
+         values (?, ?, 'phone', 'prescription_changed', 'Dose halved', ?)",
         organization_id,
-        prescription_id
+        prescription_id,
+        business.user_id
     );
     seed!(
         db,
@@ -129,8 +136,9 @@ async fn seed_every_new_table(db: &Db, business: &Business, suffix: &str) {
     seed!(
         db,
         "insert into pharmacy.refill_schedules \
-             (organization_id, customer_id, product_id, days_of_supply, reminder_status) \
-         values (?, ?, ?, 30, 'scheduled')",
+             (organization_id, customer_id, product_id, days_of_supply, reminder_status, \
+              next_due_on) \
+         values (?, ?, ?, 30, 'scheduled', current_date + 30)",
         organization_id,
         customer,
         product
@@ -146,8 +154,10 @@ async fn seed_every_new_table(db: &Db, business: &Business, suffix: &str) {
         business.user_id
     );
     let recall_notice_id: Uuid = raw("insert into pharmacy.recall_notices \
-             (organization_id, supplier_name, product_id, batch_number, reason_text, status) \
-         values (?, 'Medipharm Distributors', ?, 'B-2291', 'Failed stability test', 'quarantined') \
+             (organization_id, supplier_name, product_id, batch_number, reason_text, status, \
+              recall_reference) \
+         values (?, 'Medipharm Distributors', ?, 'B-2291', 'Failed stability test', 'quarantined', \
+                 'RC-2024-0007') \
          returning id")
     .bind(organization_id)
     .bind(product)
