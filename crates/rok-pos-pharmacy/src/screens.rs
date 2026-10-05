@@ -14,7 +14,6 @@ pub mod insurance_claims;
 pub mod licences_and_inspection;
 pub mod medicines;
 pub mod order_medicines;
-pub mod patient_profile;
 pub mod placeholder;
 pub mod recalls;
 pub mod receive_delivery;

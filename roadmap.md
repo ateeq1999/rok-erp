@@ -125,12 +125,18 @@ presentation -> application -> domain <- data
       from the element's id, so a widget test can click the link the board named.
       `screens/prescription_check.rs` is gone and
       `/prescriptions/:prescription_id/check` frames `features::ClinicalCheckPage::new()`.
+- [x] `features/shared/board/`, the toolkit every board is drawn with, moved out of the
+      screens module so a feature's presentation imports `features::shared::board`. Two boundary
+      tests walk the presentation sources and fail on a `screens::board` import or an import of
+      another feature.
+- [x] `features/patient_profile/`, the same four layers for a patient's record and the list it
+      is found from: two `BLoC`s (record and directory), the refill rules (`a medicine due when
+      the clinic says so is not a pharmacy refill`), and the board's seven-patient directory.
+      `/patients` and `/patients/:patient_id` frame `features::PatientListPage::new()` and
+      `features::PatientProfilePage::new()`, and `screens/patient_profile.rs` is gone.
 - [ ] Licences and inspection readiness (board already drawn in `screens/licences_and_inspection.rs`,
       to be rebuilt as `features/licences/`).
 - [ ] Reports (board already drawn in `screens/reports.rs`, to be rebuilt as `features/reports/`).
 
 The remaining screens move across one feature at a time, each keeping the board it was drawn
 from as its story data.
-
-A presentation layer still reaches into `screens::board` for its toolkit. That is the one
-cross-feature dependency left; `features/shared/` would take it out.

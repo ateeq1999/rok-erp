@@ -141,20 +141,26 @@ pub fn card_title(title: impl Into<SharedString>) -> Div {
 /// The boards make a whole row a link: a prescription row, a batch row, a
 /// patient row. Each needs its own [`ElementId`] so two rows do not share one
 /// focus ring. The id is also the element's debug selector, so a widget test
-/// can find the link by the same name the board gave it.
+/// can find the link by the same name the board gave it. The href is usually a
+/// route's static path, but a row that opens a record it names hands over the
+/// path it was read with.
 #[must_use]
-pub fn link_to(id: impl Into<ElementId>, href: &'static str) -> gpui::Stateful<Div> {
+pub fn link_to(id: impl Into<ElementId>, href: impl Into<SharedString>) -> gpui::Stateful<Div> {
     let selector = id.into();
     let name = selector.to_string();
+    let href: SharedString = href.into();
     div()
         .id(selector)
         .debug_selector(move || name.clone())
         .tab_index(0)
-        .on_click(move |_, _, cx| navigate(href, cx))
+        .on_click({
+            let href = href.clone();
+            move |_, _, cx| navigate(href.clone(), cx)
+        })
         .on_key_down(move |event, _, cx| {
             if matches!(event.keystroke.key.as_str(), "enter" | "space") {
                 cx.stop_propagation();
-                navigate(href, cx);
+                navigate(href.clone(), cx);
             }
         })
 }
@@ -442,7 +448,7 @@ pub fn footnote(text: impl Into<SharedString>) -> Div {
 #[must_use]
 pub fn link(
     id: impl Into<ElementId>,
-    href: &'static str,
+    href: impl Into<SharedString>,
     text: impl Into<SharedString>,
 ) -> gpui::Stateful<Div> {
     link_to(id, href).sx(&BOARD.link).child(text.into())
