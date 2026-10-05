@@ -138,11 +138,15 @@ pub fn card_title(title: impl Into<SharedString>) -> Div {
 ///
 /// The boards make a whole row a link: a prescription row, a batch row, a
 /// patient row. Each needs its own [`ElementId`] so two rows do not share one
-/// focus ring.
+/// focus ring. The id is also the element's debug selector, so a widget test
+/// can find the link by the same name the board gave it.
 #[must_use]
 pub fn link_to(id: impl Into<ElementId>, href: &'static str) -> gpui::Stateful<Div> {
+    let selector = id.into();
+    let name = selector.to_string();
     div()
-        .id(id)
+        .id(selector)
+        .debug_selector(move || name.clone())
         .tab_index(0)
         .on_click(move |_, _, cx| navigate(href, cx))
         .on_key_down(move |event, _, cx| {
