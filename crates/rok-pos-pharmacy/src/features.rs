@@ -5,5 +5,7 @@
 //! reaches into another feature's presentation.
 
 pub mod dashboard;
+pub mod prescriptions;
 
 pub use dashboard::DashboardPage;
+pub use prescriptions::PrescriptionsPage;

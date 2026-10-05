@@ -17,7 +17,6 @@ pub mod order_medicines;
 pub mod patient_profile;
 pub mod placeholder;
 pub mod prescription_check;
-pub mod prescriptions;
 pub mod recalls;
 pub mod receive_delivery;
 pub mod refills;
