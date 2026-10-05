@@ -5,7 +5,8 @@
 //! supplier app can use the same frame with its own accent.
 
 use gpui::{App, Hsla, Rgba, SharedString, Window, WindowAppearance, px, rgb};
-use rok_ui::prelude::{Theme, ThemeColors, ThemeMode, ThemePreset};
+use rok_ui::hooks::State;
+use rok_ui::prelude::{IconName, Theme, ThemeColors, ThemeMode, ThemePreset};
 
 use crate::fonts;
 
@@ -64,6 +65,120 @@ pub fn pharmacy_theme(mode: ThemeMode) -> Theme {
 /// Install the pharmacy theme. Called once at startup, after `rok_ui::init`.
 pub fn install_theme(cx: &mut App) {
     Theme::set_global(pharmacy_theme(ThemeMode::Light), cx);
+}
+
+/// What the signed-in user has chosen, and what it falls back to.
+///
+/// The boards are drawn in light, and a dark desktop is not a request to
+/// override an explicit choice, so this is only consulted when the user has
+/// not said. That is what makes the window a light pharmacy and the same window
+/// a dark one when the operating system says so.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum Appearance {
+    /// Follow whatever the operating system says.
+    #[default]
+    System,
+    /// Light, whatever the operating system says.
+    Light,
+    /// Dark, whatever the operating system says.
+    Dark,
+}
+
+impl Appearance {
+    /// The mode to draw in, given what the window currently reports.
+    #[must_use]
+    pub fn resolve(self, window: &Window) -> ThemeMode {
+        self.resolve_mode(mode_of(window))
+    }
+
+    /// The mode to draw in, given the mode the system reports.
+    ///
+    /// Split out from [`Appearance::resolve`] so the pinned-versus-following
+    /// rule is testable without a window.
+    #[must_use]
+    pub const fn resolve_mode(self, system: ThemeMode) -> ThemeMode {
+        match self {
+            Appearance::System => system,
+            Appearance::Light => ThemeMode::Light,
+            Appearance::Dark => ThemeMode::Dark,
+        }
+    }
+
+    /// What choosing this one gives, as the toggle's label.
+    #[must_use]
+    pub const fn next(self) -> Self {
+        match self {
+            Appearance::System => Appearance::Light,
+            Appearance::Light => Appearance::Dark,
+            Appearance::Dark => Appearance::System,
+        }
+    }
+
+    /// The word the toggle shows: what the app is doing now.
+    #[must_use]
+    pub const fn label(self) -> &'static str {
+        match self {
+            Appearance::System => "System",
+            Appearance::Light => "Light",
+            Appearance::Dark => "Dark",
+        }
+    }
+
+    /// The icon beside the word.
+    ///
+    /// rok-ui ships no `monitor` icon, so `System` borrows the gear: it is the
+    /// one setting that is neither the sun nor the moon.
+    #[must_use]
+    pub const fn icon(self) -> IconName {
+        match self {
+            Appearance::System => IconName::Settings,
+            Appearance::Light => IconName::Sun,
+            Appearance::Dark => IconName::Moon,
+        }
+    }
+}
+
+/// Every appearance, in the order the toggle cycles through them.
+pub const APPEARANCES: [Appearance; 3] = [Appearance::System, Appearance::Light, Appearance::Dark];
+
+/// Install the theme `appearance` asks for on `window`.
+///
+/// Idempotent and side-effect free beyond the theme itself, so it is safe to
+/// call on every frame, on every click and on every system appearance change:
+/// the same answer is the same theme. What keeps the two paths in step is
+/// [`observe_appearance`], which re-runs this on every system change.
+pub fn apply_appearance(appearance: Appearance, window: &Window, cx: &mut App) {
+    Theme::set_global(pharmacy_theme(appearance.resolve(window)), cx);
+}
+
+/// Re-apply the window's chosen `appearance` every time the window's own
+/// appearance changes.
+///
+/// Hold the returned [`gpui::Subscription`] for as long as the window is open.
+/// This is what makes a window following the system repaint when the system
+/// flips, while a window the user pinned to light or dark does not: both go
+/// through [`apply_appearance`], and a pinned choice resolves the same way
+/// every time.
+///
+/// The choice is read from `chosen` on every callback rather than captured, so
+/// one subscription registered at startup stays correct for as long as it
+/// lives. Registering a fresh observer per click instead would accumulate
+/// observers that each held a stale answer, and the last one to be created
+/// would not be the last one to fire.
+///
+/// ```no_run
+/// # use rok_ui::prelude::*;
+/// # use rok_pos_shell::theme::{Appearance, observe_appearance};
+/// # fn example(cx: &mut Cx) {
+/// let chosen = cx.use_state(|| Appearance::System);
+/// let subscription = observe_appearance(chosen.clone(), cx.window);
+/// let _subscribed = cx.use_state(|| subscription);
+/// # }
+/// ```
+pub fn observe_appearance(chosen: State<Appearance>, window: &Window) -> gpui::Subscription {
+    window.observe_window_appearance(Box::new(move |window: &mut Window, cx: &mut App| {
+        apply_appearance(chosen.get(cx), window, cx);
+    }))
 }
 
 /// The pharmacy's tokens in `mode`.
@@ -128,11 +243,15 @@ pub fn colors(mode: ThemeMode) -> ThemeColors {
 ///
 /// Panics when `rok_ui::init` has not installed a theme.
 pub fn sync_with_system_appearance(window: &Window, cx: &mut App) {
-    let mode = match window.appearance() {
+    Theme::set_global(pharmacy_theme(mode_of(window)), cx);
+}
+
+/// What `window` reports: dark or light, collapsing the vibrant variants.
+fn mode_of(window: &Window) -> ThemeMode {
+    match window.appearance() {
         WindowAppearance::Dark | WindowAppearance::VibrantDark => ThemeMode::Dark,
         WindowAppearance::Light | WindowAppearance::VibrantLight => ThemeMode::Light,
-    };
-    Theme::set_global(pharmacy_theme(mode), cx);
+    }
 }
 
 /// The contrast ratio between two opaque colours, from 1 to 21, as WCAG 2.1
@@ -193,10 +312,79 @@ fn pairs(mode: ThemeMode) -> Vec<(&'static str, Hsla, Hsla)> {
 
 #[cfg(test)]
 mod tests {
-    use super::{ACCENT, MINIMUM_TEXT_CONTRAST, colors, contrast_ratio, hsla, pharmacy_theme};
+    use super::{
+        ACCENT, APPEARANCES, Appearance, MINIMUM_TEXT_CONTRAST, colors, contrast_ratio, hsla,
+        pharmacy_theme,
+    };
     use gpui::Rgba;
     use gpui::rgb;
+    use rok_ui::prelude::IconName;
     use rok_ui::theme::{ThemeMode, ThemePreset};
+
+    #[test]
+    fn the_toggle_cycles_through_all_three_and_returns_home() {
+        let mut seen = Vec::new();
+        let mut appearance = Appearance::default();
+        for _ in 0..APPEARANCES.len() {
+            assert!(
+                !seen.contains(&appearance),
+                "{appearance:?} came round twice before all three were seen"
+            );
+            seen.push(appearance);
+            appearance = appearance.next();
+        }
+        assert_eq!(seen, APPEARANCES.to_vec());
+        assert_eq!(
+            appearance,
+            Appearance::System,
+            "the toggle should land back where it started"
+        );
+    }
+
+    #[test]
+    fn a_pinned_choice_ignores_the_window() {
+        // A pinned light window on a dark desktop is still light: that is the
+        // whole point of pinning, so both windows resolve the same way.
+        assert_eq!(
+            Appearance::Light.resolve_mode(ThemeMode::Dark),
+            ThemeMode::Light
+        );
+        assert_eq!(
+            Appearance::Dark.resolve_mode(ThemeMode::Light),
+            ThemeMode::Dark
+        );
+        assert_eq!(
+            Appearance::System.resolve_mode(ThemeMode::Dark),
+            ThemeMode::Dark
+        );
+        assert_eq!(
+            Appearance::System.resolve_mode(ThemeMode::Light),
+            ThemeMode::Light
+        );
+    }
+
+    #[test]
+    fn each_appearance_names_itself_and_its_icon() {
+        assert_eq!(Appearance::System.label(), "System");
+        assert_eq!(Appearance::Light.label(), "Light");
+        assert_eq!(Appearance::Dark.label(), "Dark");
+        assert_ne!(Appearance::Light.icon(), Appearance::Dark.icon());
+        assert_ne!(Appearance::System.icon(), Appearance::Light.icon());
+        assert_ne!(Appearance::System.icon(), Appearance::Dark.icon());
+    }
+
+    #[test]
+    fn the_toggle_reads_as_a_distinct_icon_in_every_mode() {
+        // The icon is the only thing that tells a pinned dark window from a
+        // system window that happens to be dark, so the three never collide.
+        let icons: Vec<IconName> = APPEARANCES.iter().map(|a| a.icon()).collect();
+        for (index, icon) in icons.iter().enumerate() {
+            assert!(
+                !icons[..index].contains(icon),
+                "{icon:?} is used twice in the toggle"
+            );
+        }
+    }
 
     #[test]
     fn every_text_pair_reaches_the_contrast_floor() {
