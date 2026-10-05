@@ -105,5 +105,63 @@ patient:
     failed:
       title: The record could not be opened
 
+licence:
+  alert:
+    renewal_due_in: "%{title} renewal due in %{days} days"
+    lapsed: "%{title} lapsed %{days} days ago"
+    issued: "%{issuer} · %{branch} · expires %{expires}"
+    submit_by: "submit by %{deadline} · %{days} days left"
+    days_left: "%{days} days left"
+    note: A lapsed premises licence is the one expiry that closes the pharmacy.
+  loading:
+    title: Opening the folder
+    body: Licences, the inspector's checklist and the documents on file.
+  failed:
+    title: The folder could not be read
+  held:
+    valid: Valid
+    renew_soon: Renew soon
+    not_held: Not held
+    title: Licences and registrations
+    meta: Both branches
+    col:
+      licence: Licence
+      branch: Branch
+      number: Number
+      expires: Expires
+      state: State
+  readiness:
+    ready: Ready
+    missing: Missing
+    title: Inspection readiness
+    meta: "%{missing} of %{total} not ready"
+    start_renewal: Start the renewal
+    export: Export the folder
+    folder_alert_title: The folder is what an inspector reads
+    folder_alert_body: A licence held in the database but not on file as a document is a licence the inspector cannot see.
+  documents:
+    reminder_days: "%{days} days before"
+    reminder_submit: submit by
+    on_file: On file
+    missing: Missing
+    title: Documents on file
+    meta: "%{missing} not on file"
+    col:
+      document: Document
+      branch: Branch
+      expires: Expires
+      reminder: Reminder
+      file: File
+  stat:
+    held: Licences held
+    held_note: across both branches
+    renewing: Renewing
+    renewing_note: the premises licence is the one that closes the shop
+    ready: Inspection readiness
+    ready_note: what an inspector would find
+    missing: Documents missing
+    missing_note: the folder is what the inspector reads
+  footnote: "Nothing on this screen is a substitute for the paper: it is the list of what the folder has to contain."
+
 common:
   retry: Try again

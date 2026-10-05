@@ -142,8 +142,12 @@ presentation -> application -> domain <- data
       order on Windows. Noto Sans Arabic ships beside Outfit and Oxanium, and the boards'
       numeric columns stay right-aligned in both directions. Features translated so far:
       the frame and the patient feature; the rest move to `t!` as they are touched.
-- [ ] Licences and inspection readiness (board already drawn in `screens/licences_and_inspection.rs`,
-      to be rebuilt as `features/licences/`).
+- [x] `features/licences/`, the same four layers for the folder an inspector reads: the
+      board's rule that a renewal due date is day arithmetic, not text (`CivilDate` counts the
+      board's 57 days from the story's date), the standing chips derived from one `Standing`
+      enum, and the gap the board leads with - the licence itself is on file while the renewal
+      application is not. `/licences` frames `features::LicencesPage::new()`, and
+      `screens/licences_and_inspection.rs` is gone. The copy is English and Arabic.
 - [ ] Reports (board already drawn in `screens/reports.rs`, to be rebuilt as `features/reports/`).
 
 The remaining screens move across one feature at a time, each keeping the board it was drawn

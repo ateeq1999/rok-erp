@@ -11,7 +11,6 @@ pub mod board;
 pub mod controlled_register;
 pub mod dispensary_till;
 pub mod insurance_claims;
-pub mod licences_and_inspection;
 pub mod medicines;
 pub mod order_medicines;
 pub mod placeholder;

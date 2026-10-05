@@ -105,5 +105,63 @@ patient:
     failed:
       title: تعذّر فتح السجل
 
+licence:
+  alert:
+    renewal_due_in: "تجديد %{title} مستحق خلال %{days} يوماً"
+    lapsed: "%{title} منتهٍ منذ %{days} يوماً"
+    issued: "%{issuer} · %{branch} · ينتهي في %{expires}"
+    submit_by: "التقديم قبل %{deadline} · بقي %{days} يوماً"
+    days_left: بقي %{days} يوماً
+    note: انتهاء صلاحية ترخيص المكان هو التاريخ الوحيد الذي يغلق الصيدلية.
+  loading:
+    title: يجري فتح المجلد
+    body: التراخيص وقائمة التفتيش والمستندات المحفوظة.
+  failed:
+    title: تعذّرت قراءة المجلد
+  held:
+    valid: ساري
+    renew_soon: يجدد قريباً
+    not_held: غير مُمتَلك
+    title: التراخيص والتسجيلات
+    meta: الفرعان
+    col:
+      licence: الترخيص
+      branch: الفرع
+      number: الرقم
+      expires: ينتهي في
+      state: الحالة
+  readiness:
+    ready: جاهز
+    missing: مفقود
+    title: الجاهزية للتفتيش
+    meta: "%{missing} من %{total} غير جاهز"
+    start_renewal: ابدأ التجديد
+    export: صدّر المجلد
+    folder_alert_title: المجلد هو ما يقرأه المفتش
+    folder_alert_body: الترخيص المحفوظ في قاعدة البيانات لكنه ليس مستنداً على الملف هو ترخيص لا يستطيع المفتش رؤيته.
+  documents:
+    reminder_days: قبل %{days} يوماً
+    reminder_submit: يُقدَّم قبل
+    on_file: على الملف
+    missing: مفقود
+    title: المستندات المحفوظة
+    meta: "%{missing} غير محفوظ"
+    col:
+      document: المستند
+      branch: الفرع
+      expires: ينتهي في
+      reminder: التذكير
+      file: الملف
+  stat:
+    held: التراخيص الممتلكة
+    held_note: في الفرعين
+    renewing: قيد التجديد
+    renewing_note: ترخيص المكان هو ما يغلق الصيدلية
+    ready: الجاهزية للتفتيش
+    ready_note: ما سيجده المفتش
+    missing: مستندات مفقودة
+    missing_note: المجلد هو ما يقرأه المفتش
+  footnote: "لا شيء في هذه الشاشة يعوض الورق: إنها قائمة ما يجب أن يحويه المجلد."
+
 common:
   retry: حاول مجدداً
