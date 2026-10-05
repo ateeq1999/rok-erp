@@ -110,7 +110,7 @@ async fn story_with_grants(db: &Db) {
 /// Every one of the fifteen tables has row level security enabled and the
 /// `organization_isolation` policy on it, which is what makes the app role's
 /// reads safe in the first place.
-#[rok_db::test]
+#[rok_db::test(sql = "tests/app_role.sql")]
 async fn every_new_table_is_isolated(db: Db) {
     story_with_grants(&db).await;
     let app = app_db(&db).await;
@@ -139,7 +139,7 @@ async fn every_new_table_is_isolated(db: Db) {
 
 /// The app role reads the story's rows in the story's business and nothing at
 /// all in any other, table by table.
-#[rok_db::test]
+#[rok_db::test(sql = "tests/app_role.sql")]
 async fn every_new_table_hides_the_other_business(db: Db) {
     story_with_grants(&db).await;
     let app = app_db(&db).await;
@@ -186,7 +186,7 @@ async fn every_new_table_hides_the_other_business(db: Db) {
 
 /// A write for another business is refused by the policy, not by the caller:
 /// the row never reaches the table.
-#[rok_db::test]
+#[rok_db::test(sql = "tests/app_role.sql")]
 async fn a_write_for_another_business_is_refused_on_the_new_tables(db: Db) {
     story_with_grants(&db).await;
     let app = app_db(&db).await;

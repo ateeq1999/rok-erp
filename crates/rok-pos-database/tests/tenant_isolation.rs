@@ -75,7 +75,7 @@ async fn seed_batch(db: &Db, organization_id: Uuid, batch_number: &str, amount: 
     .expect("the owner role can seed a batch");
 }
 
-#[rok_db::test(sql = "tests/tenant_schema.sql")]
+#[rok_db::test(sql = "tests/app_role.sql", sql = "tests/tenant_schema.sql")]
 async fn raw_sql_sees_only_the_sessions_own_business(db: Db) {
     let afya = Uuid::now_v7();
     let uzima = Uuid::now_v7();
@@ -104,7 +104,7 @@ async fn raw_sql_sees_only_the_sessions_own_business(db: Db) {
     );
 }
 
-#[rok_db::test(sql = "tests/tenant_schema.sql")]
+#[rok_db::test(sql = "tests/app_role.sql", sql = "tests/tenant_schema.sql")]
 async fn each_business_sees_only_its_own_rows(db: Db) {
     let afya = Uuid::now_v7();
     let uzima = Uuid::now_v7();
@@ -134,7 +134,7 @@ async fn each_business_sees_only_its_own_rows(db: Db) {
     assert_eq!(uzima_total, rust_decimal::Decimal::new(340_000, 0));
 }
 
-#[rok_db::test(sql = "tests/tenant_schema.sql")]
+#[rok_db::test(sql = "tests/app_role.sql", sql = "tests/tenant_schema.sql")]
 async fn a_write_for_another_business_is_refused(db: Db) {
     let afya = Uuid::now_v7();
     let uzima = Uuid::now_v7();
@@ -169,7 +169,7 @@ async fn a_write_for_another_business_is_refused(db: Db) {
     assert_eq!(stored, 0, "nothing was written into another business");
 }
 
-#[rok_db::test(sql = "tests/tenant_schema.sql")]
+#[rok_db::test(sql = "tests/app_role.sql", sql = "tests/tenant_schema.sql")]
 async fn a_session_without_the_setting_sees_nothing(db: Db) {
     let afya = Uuid::now_v7();
     seed_batch(&db, afya, "AMX-2409", 120_000).await;
