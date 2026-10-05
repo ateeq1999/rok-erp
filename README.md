@@ -49,7 +49,11 @@ Rust stable, Docker (or any PostgreSQL 17), and an environment file:
 cp .env.example .env     # then set DATABASE_URL
 ```
 
-`.env` is gitignored and never committed.
+`.env` is gitignored and never committed. You do not have to export it:
+`pharmacy` and `migration-verifier` read `.env` at startup, looking in the
+working directory and then its parents. Whatever is already set in the
+environment wins over the file, so `DATABASE_URL=... pharmacy --install`
+still overrides it.
 
 Run the app:
 
@@ -69,9 +73,14 @@ cargo test --workspace --all-features
 cargo run -p migration-verifier -- --modules database/modules
 ```
 
-The database tests each take a database of their own and drop it afterwards,
-so they need `DATABASE_URL` pointing at a PostgreSQL server you are willing to
-create and drop databases on.
+The database tests each take a database of their own and drop it afterwards.
+They are run by the test harness rather than by `main`, so they do not read
+`.env`: export `DATABASE_URL` first, or a run with it unset silently skips
+every database test.
+
+```sh
+set -a && source .env && set +a && cargo test --workspace --all-features
+```
 
 ## House rules
 

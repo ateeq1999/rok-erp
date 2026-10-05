@@ -226,7 +226,7 @@ async fn rows_changed_outside(app: &Db, organization_id: Uuid, other: Uuid, tabl
     .expect("the app role runs the update")
 }
 
-#[rok_db::test]
+#[rok_db::test(sql = "tests/app_role.sql")]
 async fn every_new_table_shows_a_business_only_its_own_rows(db: Db) {
     install_pharmacy_stack(&db).await;
     grant_pharmacy_to_app_role(&db).await;
@@ -246,7 +246,7 @@ async fn every_new_table_shows_a_business_only_its_own_rows(db: Db) {
     }
 }
 
-#[rok_db::test]
+#[rok_db::test(sql = "tests/app_role.sql")]
 async fn a_business_cannot_change_another_businesss_row_in_a_new_table(db: Db) {
     install_pharmacy_stack(&db).await;
     grant_pharmacy_to_app_role(&db).await;
@@ -267,7 +267,7 @@ async fn a_business_cannot_change_another_businesss_row_in_a_new_table(db: Db) {
     }
 }
 
-#[rok_db::test]
+#[rok_db::test(sql = "tests/app_role.sql")]
 async fn a_claim_keeps_its_numbers_when_its_batch_is_deleted(db: Db) {
     install_pharmacy_stack(&db).await;
 

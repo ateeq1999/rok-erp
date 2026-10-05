@@ -15,6 +15,8 @@ rok-db = { version = "0.3", features = ["chrono", "uuid", "json", "serde", "test
 serde_json = "1"
 sha2 = "0.10"
 sqlx = { version = "0.8", default-features = false, features = ["rust_decimal"] }
+# Reads `.env` at startup, so `cargo run` needs no `set -a; source .env`.
+dotenvy = "0.15"
 rust_decimal = "1"
 rok-pos-domain = { path = "crates/rok-pos-domain" }
 rok-pos-shell = { path = "crates/rok-pos-shell" }
