@@ -101,6 +101,138 @@ pub struct Patient {
     pub notes: Vec<Note>,
 }
 
+/// The board's patient, as the details panel pairs them.
+const DETAILS: [Detail; 6] = [
+    Detail {
+        label: "Patient since",
+        value: "03/2024",
+    },
+    Detail {
+        label: "Phone",
+        value: "+255 7\u{2022}\u{2022}\u{2022} \u{2022}\u{2022}\u{2022} 508",
+    },
+    Detail {
+        label: "Date of birth",
+        value: "[Date of birth] \u{b7} 68 years",
+    },
+    Detail {
+        label: "Sex",
+        value: "Male",
+    },
+    Detail {
+        label: "Area",
+        value: "Mwenge, Dar es Salaam",
+    },
+    Detail {
+        label: "Preferred language",
+        value: "Kiswahili",
+    },
+];
+
+/// Their long-term conditions, and where each came from.
+const CONDITIONS: [Condition; 3] = [
+    Condition {
+        name: "On warfarin therapy (followed by warfarin clinic)",
+        source: "prescription",
+    },
+    Condition {
+        name: "Type 2 diabetes",
+        source: "prescription",
+    },
+    Condition {
+        name: "High blood pressure",
+        source: "prescription",
+    },
+];
+
+/// What they take now, and when each is next due.
+const MEDICINES: [Medicine; 3] = [
+    Medicine {
+        name: "Warfarin tablets",
+        directions: "As directed by the clinic",
+        last_filled: "18 Sep 2026",
+        due: "Set by clinic",
+    },
+    Medicine {
+        name: "Metformin 500mg tablets",
+        directions: "1 tablet twice a day with food",
+        last_filled: "05 Sep 2026",
+        due: "Due 5 Oct",
+    },
+    Medicine {
+        name: "Amlodipine 5mg tablets",
+        directions: "1 tablet once a day",
+        last_filled: "12 Sep 2026",
+        due: "Due 12 Oct",
+    },
+];
+
+/// Their fills, newest first.
+const FILLS: [Fill; 6] = [
+    fill(
+        "02 Oct 2026",
+        "RX-2214",
+        "Metronidazole 400mg \u{d7} 21, Amoxicillin 500mg \u{d7} 15",
+        "[Dental clinic name]",
+        "Grace N.",
+        "Approved, at till",
+    ),
+    fill(
+        "18 Sep 2026",
+        "RX-2068",
+        "Warfarin, as directed",
+        "[Warfarin clinic]",
+        "Grace N.",
+        "Collected",
+    ),
+    fill(
+        "12 Sep 2026",
+        "RX-2012",
+        "Amlodipine 5mg \u{d7} 30",
+        "[Prescriber name]",
+        "John M.",
+        "Collected",
+    ),
+    fill(
+        "05 Sep 2026",
+        "RX-1944",
+        "Metformin 500mg \u{d7} 60",
+        "[Prescriber name]",
+        "Grace N.",
+        "Collected",
+    ),
+    fill(
+        "21 Aug 2026",
+        "RX-1871",
+        "Warfarin, as directed",
+        "[Warfarin clinic]",
+        "Grace N.",
+        "Collected",
+    ),
+    fill(
+        "13 Aug 2026",
+        "RX-1839",
+        "Amlodipine 5mg \u{d7} 30",
+        "[Prescriber name]",
+        "John M.",
+        "Collected",
+    ),
+];
+
+/// Their pharmacist's notes, newest first.
+const NOTES: [Note; 2] = [
+    Note {
+        title: "Prescriber call \u{b7} RX-2214",
+        meta: "02 Oct 15:10 \u{b7} Grace N.",
+        body: "Interaction alert warfarin + metronidazole. Called [Dental clinic name], spoke to [Prescriber name]. Prescriber agreed to keep both and asked for an extra INR check.",
+    },
+    Note {
+        title: "Counselling",
+        meta: "18 Sep 14:22 \u{b7} Grace N.",
+        body: "Patient asked about pain relief. Advised to ask the pharmacist before taking any new medicine, including painkillers bought elsewhere.",
+    },
+];
+
 impl Patient {
     /// The board's patient, Mzee Salim R.
     #[must_use]
@@ -108,135 +240,18 @@ impl Patient {
         Self {
             initials: "SR",
             name: "Mzee Salim R.",
-            details: vec![
-                Detail {
-                    label: "Patient since",
-                    value: "03/2024",
-                },
-                Detail {
-                    label: "Phone",
-                    value: "+255 7\u{2022}\u{2022}\u{2022} \u{2022}\u{2022}\u{2022} 508",
-                },
-                Detail {
-                    label: "Date of birth",
-                    value: "[Date of birth] \u{b7} 68 years",
-                },
-                Detail {
-                    label: "Sex",
-                    value: "Male",
-                },
-                Detail {
-                    label: "Area",
-                    value: "Mwenge, Dar es Salaam",
-                },
-                Detail {
-                    label: "Preferred language",
-                    value: "Kiswahili",
-                },
-            ],
+            details: DETAILS.to_vec(),
             insurer: "National health insurance \u{b7} member 10-xxxx-508",
             cover: "Active \u{b7} checked 02 Oct 14:50",
             allergies: "none known \u{b7} confirmed 02 Oct",
             allergies_confirmed: "Allergies:",
             allergy_source: "From prescriptions on file. As written by prescribers. Not a diagnosis by the pharmacy.",
-            conditions: vec![
-                Condition {
-                    name: "On warfarin therapy (followed by warfarin clinic)",
-                    source: "prescription",
-                },
-                Condition {
-                    name: "Type 2 diabetes",
-                    source: "prescription",
-                },
-                Condition {
-                    name: "High blood pressure",
-                    source: "prescription",
-                },
-            ],
+            conditions: CONDITIONS.to_vec(),
             reminders: "On",
             consent: "Consent given at the counter 14 Mar 2024. Kiswahili messages.",
-            medicines: vec![
-                Medicine {
-                    name: "Warfarin tablets",
-                    directions: "As directed by the clinic",
-                    last_filled: "18 Sep 2026",
-                    due: "Set by clinic",
-                },
-                Medicine {
-                    name: "Metformin 500mg tablets",
-                    directions: "1 tablet twice a day with food",
-                    last_filled: "05 Sep 2026",
-                    due: "Due 5 Oct",
-                },
-                Medicine {
-                    name: "Amlodipine 5mg tablets",
-                    directions: "1 tablet once a day",
-                    last_filled: "12 Sep 2026",
-                    due: "Due 12 Oct",
-                },
-            ],
-            fills: vec![
-                fill(
-                    "02 Oct 2026",
-                    "RX-2214",
-                    "Metronidazole 400mg \u{d7} 21, Amoxicillin 500mg \u{d7} 15",
-                    "[Dental clinic name]",
-                    "Grace N.",
-                    "Approved, at till",
-                ),
-                fill(
-                    "18 Sep 2026",
-                    "RX-2068",
-                    "Warfarin, as directed",
-                    "[Warfarin clinic]",
-                    "Grace N.",
-                    "Collected",
-                ),
-                fill(
-                    "12 Sep 2026",
-                    "RX-2012",
-                    "Amlodipine 5mg \u{d7} 30",
-                    "[Prescriber name]",
-                    "John M.",
-                    "Collected",
-                ),
-                fill(
-                    "05 Sep 2026",
-                    "RX-1944",
-                    "Metformin 500mg \u{d7} 60",
-                    "[Prescriber name]",
-                    "Grace N.",
-                    "Collected",
-                ),
-                fill(
-                    "21 Aug 2026",
-                    "RX-1871",
-                    "Warfarin, as directed",
-                    "[Warfarin clinic]",
-                    "Grace N.",
-                    "Collected",
-                ),
-                fill(
-                    "13 Aug 2026",
-                    "RX-1839",
-                    "Amlodipine 5mg \u{d7} 30",
-                    "[Prescriber name]",
-                    "John M.",
-                    "Collected",
-                ),
-            ],
-            notes: vec![
-                Note {
-                    title: "Prescriber call \u{b7} RX-2214",
-                    meta: "02 Oct 15:10 \u{b7} Grace N.",
-                    body: "Interaction alert warfarin + metronidazole. Called [Dental clinic name], spoke to [Prescriber name]. Prescriber agreed to keep both and asked for an extra INR check.",
-                },
-                Note {
-                    title: "Counselling",
-                    meta: "18 Sep 14:22 \u{b7} Grace N.",
-                    body: "Patient asked about pain relief. Advised to ask the pharmacist before taking any new medicine, including painkillers bought elsewhere.",
-                },
-            ],
+            medicines: MEDICINES.to_vec(),
+            fills: FILLS.to_vec(),
+            notes: NOTES.to_vec(),
         }
     }
 
@@ -467,6 +482,211 @@ pub fn PatientProfile(patient: Patient, #[sx] sx: Sx, cx: &mut Cx) -> impl IntoE
 /// The record with the board's figures.
 #[must_use]
 pub fn view() -> impl IntoElement {
+    PatientProfile::new(Patient::story())
+}
+
+// ---------------------------------------------------------------------------
+// The list `/patients` opens, which is how a record is found in the first place.
+
+/// One row of the patient list.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Listing {
+    /// Their record's path, as the router spells it.
+    pub href: &'static str,
+    /// Their initials, as the list's avatar shows them.
+    pub initials: &'static str,
+    /// Their name.
+    pub name: &'static str,
+    /// The phone the pharmacy reaches them on.
+    pub phone: &'static str,
+    /// Who pays, and whether they are covered today.
+    pub cover: &'static str,
+    /// Their long-term conditions, joined for the row.
+    pub conditions: &'static str,
+    /// What is next for them, or `None` when nothing is due.
+    pub next_due: Option<&'static str>,
+    /// Whether the row is one to act on now.
+    pub tone: Tone,
+}
+
+/// Every patient the list shows, most urgent first.
+const LISTINGS: [Listing; 7] = [
+    Listing {
+        href: "/patients/P-1042",
+        initials: "SR",
+        name: "Mzee Salim R.",
+        phone: "+255 7\u{2022}\u{2022}\u{2022} \u{2022}\u{2022}\u{2022} 508",
+        cover: "National health insurance",
+        conditions: "Type 2 diabetes \u{b7} Hypertension",
+        next_due: Some("Metformin 500mg \u{b7} due 5 Oct"),
+        tone: Tone::Warning,
+    },
+    Listing {
+        href: "/patients/P-0987",
+        initials: "NA",
+        name: "Zainabu A.",
+        phone: "+255 7\u{2022}\u{2022}\u{2022} \u{2022}\u{2022}\u{2022} 117",
+        cover: "National health insurance",
+        conditions: "Hypothyroidism",
+        next_due: Some("Levothyroxine 50mcg \u{b7} due 3 Oct"),
+        tone: Tone::Warning,
+    },
+    Listing {
+        href: "/patients/P-1103",
+        initials: "NK",
+        name: "Neema K.",
+        phone: "+255 6\u{2022}\u{2022}\u{2022} \u{2022}\u{2022}\u{2022} 342",
+        cover: "Cash",
+        conditions: "Hypertension",
+        next_due: Some("Amlodipine 5mg \u{b7} due 4 Oct"),
+        tone: Tone::Warning,
+    },
+    Listing {
+        href: "/patients/P-0512",
+        initials: "BM",
+        name: "Baraka M.",
+        phone: "+255 7\u{2022}\u{2022}\u{2022} \u{2022}\u{2022}\u{2022} 860",
+        cover: "National health insurance",
+        conditions: "Asthma",
+        next_due: None,
+        tone: Tone::Neutral,
+    },
+    Listing {
+        href: "/patients/P-0744",
+        initials: "FH",
+        name: "Fatuma H.",
+        phone: "+255 7\u{2022}\u{2022}\u{2022} \u{2022}\u{2022}\u{2022} 093",
+        cover: "National health insurance",
+        conditions: "Hypothyroidism \u{b7} Hyperlipidaemia",
+        next_due: Some("Levothyroxine 100mcg \u{b7} due 6 Oct"),
+        tone: Tone::Warning,
+    },
+    Listing {
+        href: "/patients/P-1220",
+        initials: "JL",
+        name: "Joseph L.",
+        phone: "+255 6\u{2022}\u{2022}\u{2022} \u{2022}\u{2022}\u{2022} 451",
+        cover: "National health insurance",
+        conditions: "Type 2 diabetes",
+        next_due: Some("Metformin 500mg \u{b7} due 7 Oct"),
+        tone: Tone::Brand,
+    },
+    Listing {
+        href: "/patients/P-0088",
+        initials: "MT",
+        name: "Mwanaisha T.",
+        phone: "+255 7\u{2022}\u{2022}\u{2022} \u{2022}\u{2022}\u{2022} 278",
+        cover: "Cash",
+        conditions: "Hypertension",
+        next_due: Some("Losartan 50mg \u{b7} due 8 Oct"),
+        tone: Tone::Brand,
+    },
+];
+
+/// The filters the list offers, as the board draws them.
+const FILTERS: [(&str, bool); 4] = [
+    ("All patients", true),
+    ("Refill due", false),
+    ("Insurance", false),
+    ("Recent", false),
+];
+
+/// The patient list: who the pharmacy serves, and who is next due.
+#[component]
+pub fn List(#[sx] sx: Sx, cx: &mut Cx) -> impl IntoElement {
+    let mode = board::mode(cx);
+    let due = LISTINGS
+        .iter()
+        .filter(|listing| listing.next_due.is_some())
+        .count();
+    div()
+        .sx((board::root(), &sx))
+        .child(board::stat_row(vec![
+            board::stat(
+                "Patients on file",
+                LISTINGS.len().to_string(),
+                "Mwenge branch \u{b7} all insurances",
+                None,
+                mode,
+            ),
+            board::stat(
+                "Refill due in 7 days",
+                due.to_string(),
+                "the reason to open a record today",
+                Some(Tone::Warning),
+                mode,
+            ),
+            board::stat(
+                "Insurance covered",
+                LISTINGS
+                    .iter()
+                    .filter(|listing| listing.cover != "Cash")
+                    .count()
+                    .to_string(),
+                "the rest pay at the counter",
+                Some(Tone::Brand),
+                mode,
+            ),
+            board::stat(
+                "New this month",
+                "2".to_string(),
+                "registered at the counter, not on a prescription",
+                None,
+                mode,
+            ),
+        ]))
+        .child(board::filters_in(mode, &FILTERS))
+        .child(
+            board::card(1.)
+                .child(board::card_head("Patients", "Newest refill first"))
+                .child(board::head(vec![
+                    board::cell("Patient"),
+                    board::cell("Phone"),
+                    board::cell("Cover"),
+                    board::cell("Conditions"),
+                    board::cell("Next due"),
+                    board::cell_fixed(""),
+                ]))
+                .children(
+                    LISTINGS
+                        .iter()
+                        .enumerate()
+                        .map(|(index, listing)| listing_row(index, listing)),
+                ),
+        )
+        .child(board::footnote(
+            "A record is the only place a patient's consent, allergies and pharmacist's notes live.",
+        ))
+}
+
+/// One row of the list, opening the record it names.
+fn listing_row(index: usize, listing: &Listing) -> Div {
+    board::line(vec![
+        board::cell_stack(
+            board::dotted(&[listing.initials, listing.name]),
+            listing.phone,
+        ),
+        board::cell(listing.phone),
+        board::cell(listing.cover),
+        board::cell(listing.conditions),
+        listing.next_due.map_or_else(
+            || board::chip("Nothing due", Tone::Neutral),
+            |due| board::chip(due, listing.tone),
+        ),
+        board::link(("patient-row", index), listing.href, "Open record").into_any_element(),
+    ])
+}
+
+/// The patient list with the board's figures.
+#[must_use]
+pub fn list() -> impl IntoElement {
+    List::new()
+}
+
+/// One patient's record, for `patient_id`. Phase 3 reads the patient from the
+/// database; until then every id opens the board's patient.
+#[must_use]
+pub fn record(_patient_id: &str) -> impl IntoElement {
     PatientProfile::new(Patient::story())
 }
 

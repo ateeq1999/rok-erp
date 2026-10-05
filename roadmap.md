@@ -73,3 +73,50 @@ and repeatably.
 
 **Phase 1 is done:** `rok-pharmacy --install` on an empty database installs the eight modules
 in order and loads the story seed, and CI's verifier passes.
+
+## Phase 13 - Dashboard, licences and reports
+
+**Goal:** the owner and pharmacist in charge see the day and stay inspection-ready. Step 1,
+the dashboard, is the feature the rest of the pharmacy's screens are being rebuilt as.
+
+### Features are feature-first, with a BLoC and four layers
+
+A screen owns its domain, its data access, its state machine and its tests, in
+`crates/rok-pos-pharmacy/src/features/<name>/`:
+
+```text
+presentation -> application -> domain <- data
+```
+
+- [x] `features/dashboard/` is the reference, and the first feature built this way:
+  - [x] `domain/`: `entities.rs` (`Dashboard`, `HourSales`, `Payment`, `MedicineSold`,
+        `DashboardTask`, `OtherBranch`, and `Text = Arc<str>` for the words drawn every frame),
+        `enums.rs` (`TaskKind`, `TaskSeverity`, `Destination`), `calculations.rs` (the rules:
+        `sales_total`, `insurance`, `percentage`, `payment_share`, `bar_heights`, `tiles`,
+        `branch_measures`, `best_sellers`, `open_tasks`), `measures.rs` (`MeasureValue`, so a
+        widget never takes a figure apart again). No `gpui`, no router, no tones.
+  - [x] `data/`: `models.rs` (the source's own records and `From` into the entities),
+        `repository.rs` (the trait, with an RPITIT future rather than `async_trait`, and the
+        data layer's own error), `story.rs` (the board's figures as records),
+        `repository_impl.rs` (`StoryDashboardRepository`, plus an unavailable one so the error
+        state can be drawn and tested).
+  - [x] `application/`: `dashboard_event.rs`, `dashboard_state.rs` (`Initial`, `Loading`,
+        `Refreshing { dashboard }`, `Loaded`, `Error`), `dashboard_use_cases.rs`,
+        `dashboard_bloc.rs` (generic over the repository, `async dispatch`, `#[must_use] state`
+        and `branch_id`).
+  - [x] `presentation/`: `styles.rs`, `dashboard_screen.rs` (one match over the state, the route
+        table and the figure formatting, which are presentation's own), `dashboard_page.rs` (the
+        BLoC behind `cx.use_state`, the first load dispatched once, a read on a copy of the bloc
+        written back in one update, the task detached), and `widgets/` for the six cards.
+  - [x] `tests/`: `domain_tests.rs` (the board's figures, plus a day with nothing on it),
+        `bloc_tests.rs` (first read, a refresh that keeps the board, a failure, a recovery, a
+        branch change, the use case's error mapping), `widget_tests.rs` (every state drawn in a
+        window, the figures the screen hands its widgets).
+- [x] The dashboard route is now `frame::page("/").child(features::DashboardPage::new())`, and
+      `screens/dashboard.rs` is gone: the page is reachable only through `features::DashboardPage`.
+- [ ] Licences and inspection readiness (board already drawn in `screens/licences_and_inspection.rs`,
+      to be rebuilt as `features/licences/`).
+- [ ] Reports (board already drawn in `screens/reports.rs`, to be rebuilt as `features/reports/`).
+
+The remaining screens move across one feature at a time, each keeping the board it was drawn
+from as its story data.

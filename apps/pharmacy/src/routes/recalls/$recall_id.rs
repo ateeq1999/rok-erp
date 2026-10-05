@@ -12,5 +12,5 @@ file_route! { component: RecallPage }
 fn RecallPage(cx: &mut App) -> impl IntoElement {
     let route = params(cx);
     frame::titled("Batch recall")
-        .child(screens::recalls::view(&route.recall_id))
+        .child(screens::recalls::recall_view(&route.recall_id))
 }

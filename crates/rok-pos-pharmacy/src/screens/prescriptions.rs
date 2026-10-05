@@ -56,7 +56,7 @@ impl Status {
 pub enum Source {
     /// Handed over on paper at the counter.
     Paper,
-    /// Photographed and sent on WhatsApp.
+    /// Photographed and sent on `WhatsApp`.
     Photo,
     /// Fetched from a prescriber by its code.
     Electronic,
@@ -134,6 +134,129 @@ pub struct QueueFigures {
     pub selected: &'static str,
 }
 
+/// The board's status tiles, in the order the board lays them out.
+const COUNTS: [StatusCount; 5] = [
+    StatusCount {
+        status: Status::New,
+        count: 2,
+        note: "to read and enter",
+    },
+    StatusCount {
+        status: Status::NeedsCheck,
+        count: 2,
+        note: "1 interaction, 1 recall flag",
+    },
+    StatusCount {
+        status: Status::WaitingPrescriber,
+        count: 1,
+        note: "call-back due 15:30",
+    },
+    StatusCount {
+        status: Status::ReadyToCollect,
+        count: 1,
+        note: "patient texted",
+    },
+    StatusCount {
+        status: Status::Dispensed,
+        count: 4,
+        note: "last at 14:05",
+    },
+];
+
+/// The queue the table shows, newest receipt first.
+const QUEUE: [Queued; 10] = [
+    Queued {
+        reference: "RX-2217",
+        received: "Received 15:11",
+        patient: "Daudi M.",
+        medicines: "Metformin 500mg, Atorvastatin 20mg",
+        source: Source::Electronic,
+        status: Status::New,
+        flags: &["National health insurance"],
+    },
+    Queued {
+        reference: "RX-2216",
+        received: "Received 15:06",
+        patient: "[Patient name]",
+        medicines: "Photo not read yet",
+        source: Source::Photo,
+        status: Status::New,
+        flags: &["Photo needs reading"],
+    },
+    Queued {
+        reference: "RX-2215",
+        received: "Received 15:02",
+        patient: "Rehema Juma",
+        medicines: "Child antibiotic syrup \u{b7} Amoxicillin 250mg/5ml",
+        source: Source::Paper,
+        status: Status::NeedsCheck,
+        flags: &["Batch AMS-2404 recalled \u{b7} use another batch"],
+    },
+    Queued {
+        reference: "RX-2214",
+        received: "Received 14:48",
+        patient: "Mzee Salim R.",
+        medicines: "Metronidazole 400mg, Amoxicillin 500mg",
+        source: Source::Paper,
+        status: Status::NeedsCheck,
+        flags: &["Interaction: warfarin"],
+    },
+    Queued {
+        reference: "RX-2218",
+        received: "Received 13:35",
+        patient: "Asha P.",
+        medicines: "Dose unclear on paper \u{b7} called clinic 13:50",
+        source: Source::Paper,
+        status: Status::WaitingPrescriber,
+        flags: &["Call-back due 15:30"],
+    },
+    Queued {
+        reference: "RX-2219",
+        received: "Received 12:30",
+        patient: "Khamis B.",
+        medicines: "Amlodipine 5mg, Losartan 50mg \u{b7} packed by John M.",
+        source: Source::Electronic,
+        status: Status::ReadyToCollect,
+        flags: &["Text sent 13:15"],
+    },
+    Queued {
+        reference: "RX-2210",
+        received: "Dispensed 14:05",
+        patient: "Ali Hassan",
+        medicines: "Amoxicillin, Paracetamol, ORS, Tramadol \u{b7} Grace N.",
+        source: Source::Paper,
+        status: Status::Dispensed,
+        flags: &["Controlled item signed"],
+    },
+    Queued {
+        reference: "RX-2213",
+        received: "Dispensed 11:55",
+        patient: "Mariam S.",
+        medicines: "Ferrous sulphate, Folic acid \u{b7} John M.",
+        source: Source::Electronic,
+        status: Status::Dispensed,
+        flags: &[],
+    },
+    Queued {
+        reference: "RX-2212",
+        received: "Dispensed 10:40",
+        patient: "Juma K.",
+        medicines: "Salbutamol inhaler \u{b7} Grace N.",
+        source: Source::Photo,
+        status: Status::Dispensed,
+        flags: &[],
+    },
+    Queued {
+        reference: "RX-2211",
+        received: "Dispensed 09:12",
+        patient: "Upendo L.",
+        medicines: "Levothyroxine 50mcg \u{b7} John M.",
+        source: Source::Paper,
+        status: Status::Dispensed,
+        flags: &[],
+    },
+];
+
 impl QueueFigures {
     /// The board's queue for Friday 2 October.
     #[must_use]
@@ -142,112 +265,8 @@ impl QueueFigures {
             range: "All prescriptions today \u{b7} RX-2210 to RX-2219",
             waiting: 6,
             oldest_waited: "oldest waiting 2 h 45 min",
-            counts: vec![
-                (Status::New, 2, "to read and enter"),
-                (Status::NeedsCheck, 2, "1 interaction, 1 recall flag"),
-                (Status::WaitingPrescriber, 1, "call-back due 15:30"),
-                (Status::ReadyToCollect, 1, "patient texted"),
-                (Status::Dispensed, 4, "last at 14:05"),
-            ]
-            .into_iter()
-            .map(|(status, count, note)| StatusCount {
-                status,
-                count,
-                note,
-            })
-            .collect(),
-            queue: vec![
-                Queued {
-                    reference: "RX-2217",
-                    received: "Received 15:11",
-                    patient: "Daudi M.",
-                    medicines: "Metformin 500mg, Atorvastatin 20mg",
-                    source: Source::Electronic,
-                    status: Status::New,
-                    flags: &["National health insurance"],
-                },
-                Queued {
-                    reference: "RX-2216",
-                    received: "Received 15:06",
-                    patient: "[Patient name]",
-                    medicines: "Photo not read yet",
-                    source: Source::Photo,
-                    status: Status::New,
-                    flags: &["Photo needs reading"],
-                },
-                Queued {
-                    reference: "RX-2215",
-                    received: "Received 15:02",
-                    patient: "Rehema Juma",
-                    medicines: "Child antibiotic syrup \u{b7} Amoxicillin 250mg/5ml",
-                    source: Source::Paper,
-                    status: Status::NeedsCheck,
-                    flags: &["Batch AMS-2404 recalled \u{b7} use another batch"],
-                },
-                Queued {
-                    reference: "RX-2214",
-                    received: "Received 14:48",
-                    patient: "Mzee Salim R.",
-                    medicines: "Metronidazole 400mg, Amoxicillin 500mg",
-                    source: Source::Paper,
-                    status: Status::NeedsCheck,
-                    flags: &["Interaction: warfarin"],
-                },
-                Queued {
-                    reference: "RX-2218",
-                    received: "Received 13:35",
-                    patient: "Asha P.",
-                    medicines: "Dose unclear on paper \u{b7} called clinic 13:50",
-                    source: Source::Paper,
-                    status: Status::WaitingPrescriber,
-                    flags: &["Call-back due 15:30"],
-                },
-                Queued {
-                    reference: "RX-2219",
-                    received: "Received 12:30",
-                    patient: "Khamis B.",
-                    medicines: "Amlodipine 5mg, Losartan 50mg \u{b7} packed by John M.",
-                    source: Source::Electronic,
-                    status: Status::ReadyToCollect,
-                    flags: &["Text sent 13:15"],
-                },
-                Queued {
-                    reference: "RX-2210",
-                    received: "Dispensed 14:05",
-                    patient: "Ali Hassan",
-                    medicines: "Amoxicillin, Paracetamol, ORS, Tramadol \u{b7} Grace N.",
-                    source: Source::Paper,
-                    status: Status::Dispensed,
-                    flags: &["Controlled item signed"],
-                },
-                Queued {
-                    reference: "RX-2213",
-                    received: "Dispensed 11:55",
-                    patient: "Mariam S.",
-                    medicines: "Ferrous sulphate, Folic acid \u{b7} John M.",
-                    source: Source::Electronic,
-                    status: Status::Dispensed,
-                    flags: &[],
-                },
-                Queued {
-                    reference: "RX-2212",
-                    received: "Dispensed 10:40",
-                    patient: "Juma K.",
-                    medicines: "Salbutamol inhaler \u{b7} Grace N.",
-                    source: Source::Photo,
-                    status: Status::Dispensed,
-                    flags: &[],
-                },
-                Queued {
-                    reference: "RX-2211",
-                    received: "Dispensed 09:12",
-                    patient: "Upendo L.",
-                    medicines: "Levothyroxine 50mcg \u{b7} John M.",
-                    source: Source::Paper,
-                    status: Status::Dispensed,
-                    flags: &[],
-                },
-            ],
+            counts: COUNTS.to_vec(),
+            queue: QUEUE.to_vec(),
             selected: "RX-2214",
         }
     }

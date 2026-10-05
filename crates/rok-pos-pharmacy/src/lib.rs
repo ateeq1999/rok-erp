@@ -5,6 +5,7 @@
 //! Until a screen's phase gives it a query, it draws the board's own figures
 //! from [`story`].
 
+pub mod features;
 pub mod frame;
 pub mod navigation;
 pub mod screens;

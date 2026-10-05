@@ -19,6 +19,7 @@ styles! {
     BOARD = {
         root: { display: flex, flex_direction: column, gap: 4 },
         row: { display: flex, flex_direction: row, gap: 4, align: stretch },
+        column: { display: flex, flex_direction: column, gap: 4, grow: 1, min_width: 0 },
         card: {
             basis: 0,
             min_width: 0,
@@ -199,6 +200,19 @@ pub fn root() -> &'static Sx {
 #[must_use]
 pub fn row() -> &'static Sx {
     &BOARD.row
+}
+
+/// A column of cards down the page, as the boards put a scan and a details rail
+/// beside the tables.
+#[must_use]
+pub fn column_style() -> &'static Sx {
+    &BOARD.column
+}
+
+/// A column of cards, so a screen can layer its own style on one.
+#[must_use]
+pub fn column() -> Div {
+    div().sx(&BOARD.column)
 }
 
 /// A body row's style, so a screen can put its own id on one and keep the

@@ -45,10 +45,8 @@ impl BatchStatus {
     pub const fn tone(self) -> Tone {
         match self {
             BatchStatus::InStock => Tone::Success,
-            BatchStatus::SellFirst => Tone::Warning,
-            BatchStatus::Quarantined => Tone::Danger,
-            BatchStatus::Expired => Tone::Danger,
-            BatchStatus::ReturnToSupplier => Tone::Warning,
+            BatchStatus::SellFirst | BatchStatus::ReturnToSupplier => Tone::Warning,
+            BatchStatus::Quarantined | BatchStatus::Expired => Tone::Danger,
             BatchStatus::Controlled => Tone::Neutral,
         }
     }
@@ -96,165 +94,171 @@ pub struct Batches {
     /// The batches, soonest expiry first.
     pub rows: Vec<Batch>,
     /// How many batches the board is showing out of all of them.
-    pub showing: (u32, u32),
+    pub showing: (usize, u32),
     /// The recall the quarantined batches belong to.
     pub recall: &'static str,
 }
+
+/// The board's four figures across the top.
+const FIGURES: [Figure; 4] = [
+    Figure {
+        label: "Expired, still on shelf",
+        count: 2,
+        note: "Blocked at the till \u{b7} in the quarantine box",
+        tone: Tone::Danger,
+    },
+    Figure {
+        label: "Expiring in 30 days",
+        count: 5,
+        note: "Value 186,400 at cost",
+        tone: Tone::Warning,
+    },
+    Figure {
+        label: "Expiring in 90 days",
+        count: 14,
+        note: "Value 612,900 at cost",
+        tone: Tone::Warning,
+    },
+    Figure {
+        label: "Quarantined",
+        count: 3,
+        note: "Includes AMS-2404 under recall RC-0047",
+        tone: Tone::Danger,
+    },
+];
+
+/// The batches the table shows, first expiry first out.
+const ROWS: [Batch; 12] = [
+    batch(
+        "Cough syrup 100ml",
+        "Quarantine box",
+        "CSY-2310",
+        "Mwenge",
+        "28 Sep 2026",
+        "6 bottles",
+        "15,600",
+        BatchStatus::Expired,
+    ),
+    batch(
+        "Vitamin C 500mg",
+        "Quarantine box",
+        "VTC-2401",
+        "Mwenge",
+        "1 Oct 2026",
+        "3 packs",
+        "8,100",
+        BatchStatus::Expired,
+    ),
+    batch(
+        "Amoxicillin 250mg/5ml syrup",
+        "Blocked at the till since 09:31",
+        "AMS-2404",
+        "Mwenge",
+        "19 Oct 2026",
+        "14 bottles",
+        "58,800",
+        BatchStatus::Quarantined,
+    ),
+    batch(
+        "Metformin 500mg tablets",
+        "Near expiry",
+        "MTF-2405",
+        "Mwenge",
+        "30 Oct 2026",
+        "9 packs",
+        "40,500",
+        BatchStatus::ReturnToSupplier,
+    ),
+    batch(
+        "Cetirizine 10mg tablets",
+        "Pinned on the till",
+        "CTZ-2502",
+        "Mwenge",
+        "12 Dec 2026",
+        "22 packs",
+        "30,800",
+        BatchStatus::SellFirst,
+    ),
+    batch(
+        "Tramadol 50mg capsules",
+        "Locked cabinet",
+        "TRM-2411",
+        "Mwenge",
+        "01/2027",
+        "80 caps",
+        "36,000",
+        BatchStatus::Controlled,
+    ),
+    batch(
+        "Amoxicillin 500mg capsules",
+        "Older batch goes first",
+        "AMX-2409",
+        "Mwenge",
+        "03/2027",
+        "1,231 caps",
+        "141,600",
+        BatchStatus::SellFirst,
+    ),
+    batch(
+        "Paracetamol 500mg tablets",
+        "Shelf B2",
+        "PCM-2502",
+        "Tegeta",
+        "11/2027",
+        "2,600 tabs",
+        "41,600",
+        BatchStatus::InStock,
+    ),
+    batch(
+        "Paracetamol 500mg tablets",
+        "Shelf B2",
+        "PCM-2502",
+        "Mwenge",
+        "11/2027",
+        "4,380 tabs",
+        "70,100",
+        BatchStatus::InStock,
+    ),
+    batch(
+        "Human insulin 100 IU/ml vial",
+        "Fridge 1 \u{b7} 2\u{2013}8 \u{b0}C",
+        "INS-2507",
+        "Mwenge",
+        "01/2028",
+        "4 vials",
+        "84,000",
+        BatchStatus::InStock,
+    ),
+    batch(
+        "Oral rehydration salts",
+        "Shelf A1",
+        "ORS-2507",
+        "Tegeta",
+        "07/2028",
+        "180 sachets",
+        "45,000",
+        BatchStatus::InStock,
+    ),
+    batch(
+        "Oral rehydration salts",
+        "Shelf A1",
+        "ORS-2507",
+        "Mwenge",
+        "07/2028",
+        "245 sachets",
+        "61,300",
+        BatchStatus::InStock,
+    ),
+];
 
 impl Batches {
     /// The board's batches at Mwenge and Tegeta.
     #[must_use]
     pub fn story() -> Self {
         Self {
-            figures: vec![
-                Figure {
-                    label: "Expired, still on shelf",
-                    count: 2,
-                    note: "Blocked at the till \u{b7} in the quarantine box",
-                    tone: Tone::Danger,
-                },
-                Figure {
-                    label: "Expiring in 30 days",
-                    count: 5,
-                    note: "Value 186,400 at cost",
-                    tone: Tone::Warning,
-                },
-                Figure {
-                    label: "Expiring in 90 days",
-                    count: 14,
-                    note: "Value 612,900 at cost",
-                    tone: Tone::Warning,
-                },
-                Figure {
-                    label: "Quarantined",
-                    count: 3,
-                    note: "Includes AMS-2404 under recall RC-0047",
-                    tone: Tone::Danger,
-                },
-            ],
-            rows: vec![
-                batch(
-                    "Cough syrup 100ml",
-                    "Quarantine box",
-                    "CSY-2310",
-                    "Mwenge",
-                    "28 Sep 2026",
-                    "6 bottles",
-                    "15,600",
-                    BatchStatus::Expired,
-                ),
-                batch(
-                    "Vitamin C 500mg",
-                    "Quarantine box",
-                    "VTC-2401",
-                    "Mwenge",
-                    "1 Oct 2026",
-                    "3 packs",
-                    "8,100",
-                    BatchStatus::Expired,
-                ),
-                batch(
-                    "Amoxicillin 250mg/5ml syrup",
-                    "Blocked at the till since 09:31",
-                    "AMS-2404",
-                    "Mwenge",
-                    "19 Oct 2026",
-                    "14 bottles",
-                    "58,800",
-                    BatchStatus::Quarantined,
-                ),
-                batch(
-                    "Metformin 500mg tablets",
-                    "Near expiry",
-                    "MTF-2405",
-                    "Mwenge",
-                    "30 Oct 2026",
-                    "9 packs",
-                    "40,500",
-                    BatchStatus::ReturnToSupplier,
-                ),
-                batch(
-                    "Cetirizine 10mg tablets",
-                    "Pinned on the till",
-                    "CTZ-2502",
-                    "Mwenge",
-                    "12 Dec 2026",
-                    "22 packs",
-                    "30,800",
-                    BatchStatus::SellFirst,
-                ),
-                batch(
-                    "Tramadol 50mg capsules",
-                    "Locked cabinet",
-                    "TRM-2411",
-                    "Mwenge",
-                    "01/2027",
-                    "80 caps",
-                    "36,000",
-                    BatchStatus::Controlled,
-                ),
-                batch(
-                    "Amoxicillin 500mg capsules",
-                    "Older batch goes first",
-                    "AMX-2409",
-                    "Mwenge",
-                    "03/2027",
-                    "1,231 caps",
-                    "141,600",
-                    BatchStatus::SellFirst,
-                ),
-                batch(
-                    "Paracetamol 500mg tablets",
-                    "Shelf B2",
-                    "PCM-2502",
-                    "Tegeta",
-                    "11/2027",
-                    "2,600 tabs",
-                    "41,600",
-                    BatchStatus::InStock,
-                ),
-                batch(
-                    "Paracetamol 500mg tablets",
-                    "Shelf B2",
-                    "PCM-2502",
-                    "Mwenge",
-                    "11/2027",
-                    "4,380 tabs",
-                    "70,100",
-                    BatchStatus::InStock,
-                ),
-                batch(
-                    "Human insulin 100 IU/ml vial",
-                    "Fridge 1 \u{b7} 2\u{2013}8 \u{b0}C",
-                    "INS-2507",
-                    "Mwenge",
-                    "01/2028",
-                    "4 vials",
-                    "84,000",
-                    BatchStatus::InStock,
-                ),
-                batch(
-                    "Oral rehydration salts",
-                    "Shelf A1",
-                    "ORS-2507",
-                    "Tegeta",
-                    "07/2028",
-                    "180 sachets",
-                    "45,000",
-                    BatchStatus::InStock,
-                ),
-                batch(
-                    "Oral rehydration salts",
-                    "Shelf A1",
-                    "ORS-2507",
-                    "Mwenge",
-                    "07/2028",
-                    "245 sachets",
-                    "61,300",
-                    BatchStatus::InStock,
-                ),
-            ],
-            showing: (12, 214),
+            figures: FIGURES.to_vec(),
+            rows: ROWS.to_vec(),
+            showing: (ROWS.len(), 214),
             recall: "RC-0047",
         }
     }
@@ -271,7 +275,8 @@ impl Batches {
                 )
             })
             .count()
-    }/// The first sellable batch for a medicine at `branch`, which is what that
+    }
+    /// The first sellable batch for a medicine at `branch`, which is what that
     /// branch's till picks: first expiry first out.
     ///
     /// The branch matters as much as the expiry. Both branches may hold the
@@ -566,6 +571,11 @@ mod tests {
         assert_eq!(batches.rows.len(), 12);
         assert_eq!(batches.blocked(), 3);
         assert_eq!(batches.showing, (12, 214));
+        assert_eq!(
+            batches.showing.0,
+            batches.rows.len(),
+            "the board says how many of its own rows it is showing"
+        );
     }
 
     #[test]
