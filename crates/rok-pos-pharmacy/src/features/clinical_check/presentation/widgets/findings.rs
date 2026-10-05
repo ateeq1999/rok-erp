@@ -4,7 +4,7 @@ use gpui::prelude::*;
 use rok_pos_shell::Tone;
 use rok_ui::prelude::*;
 
-use crate::screens::board;
+use crate::features::shared::board;
 
 /// One medicine as the screen resolves it.
 pub(crate) struct MedicineView {

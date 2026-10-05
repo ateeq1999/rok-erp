@@ -4,7 +4,7 @@ use gpui::prelude::*;
 use rok_ui::prelude::*;
 
 use crate::features::prescriptions::presentation::styles::QUEUE;
-use crate::screens::board;
+use crate::features::shared::board;
 
 /// The three ways a prescription arrives.
 pub(crate) fn card() -> Div {

@@ -17,7 +17,7 @@ use crate::features::prescriptions::application::prescriptions_state::Prescripti
 use crate::features::prescriptions::domain::calculations;
 use crate::features::prescriptions::domain::entities::PrescriptionQueue;
 use crate::features::prescriptions::domain::enums::{Destination, StatusSeverity};
-use crate::screens::board;
+use crate::features::shared::board;
 
 /// How the screen asks the `BLoC` to do something.
 pub(crate) type Dispatch = Rc<dyn Fn(PrescriptionsEvent, &mut Window, &mut App)>;

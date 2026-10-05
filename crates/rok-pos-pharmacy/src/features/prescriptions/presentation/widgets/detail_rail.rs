@@ -8,7 +8,7 @@ use rok_ui::router::navigate;
 use crate::features::prescriptions::domain::enums::Destination;
 use crate::features::prescriptions::presentation::prescriptions_screen::route;
 use crate::features::prescriptions::presentation::styles::QUEUE;
-use crate::screens::board;
+use crate::features::shared::board;
 
 /// One prescribed medicine, as the screen resolves it.
 pub(crate) struct ItemView {

@@ -8,7 +8,7 @@ use rok_ui::prelude::*;
 use crate::features::prescriptions::application::prescriptions_event::PrescriptionsEvent;
 use crate::features::prescriptions::presentation::prescriptions_screen::Dispatch;
 use crate::features::prescriptions::presentation::styles::QUEUE;
-use crate::screens::board;
+use crate::features::shared::board;
 
 /// One row of the table, as the screen resolves it.
 pub(crate) struct RowView {

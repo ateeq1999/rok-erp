@@ -5,7 +5,7 @@ use rok_pos_shell::{Tone, tone};
 use rok_ui::prelude::*;
 
 use crate::features::prescriptions::presentation::styles::QUEUE;
-use crate::screens::board;
+use crate::features::shared::board;
 
 /// One box, with its chip, its count and the note under it.
 pub(crate) fn card(label: &str, count: u32, note: &str, severity: Tone, mode: ThemeMode) -> Div {

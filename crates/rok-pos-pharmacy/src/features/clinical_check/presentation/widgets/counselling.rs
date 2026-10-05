@@ -6,7 +6,7 @@ use rok_pos_shell::Tone;
 use rok_ui::prelude::*;
 
 use crate::features::clinical_check::presentation::styles::CHECK;
-use crate::screens::board;
+use crate::features::shared::board;
 
 /// The points, in the pharmacist's own order.
 pub(crate) fn card(points: &[String]) -> Div {

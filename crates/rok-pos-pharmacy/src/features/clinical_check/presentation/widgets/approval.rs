@@ -6,7 +6,7 @@ use rok_ui::prelude::*;
 use crate::features::clinical_check::domain::enums::Destination;
 use crate::features::clinical_check::presentation::check_screen::route;
 use crate::features::clinical_check::presentation::styles::CHECK;
-use crate::screens::board;
+use crate::features::shared::board;
 
 /// One medicine on the label preview, as the screen resolves it.
 pub(crate) struct LabelView {

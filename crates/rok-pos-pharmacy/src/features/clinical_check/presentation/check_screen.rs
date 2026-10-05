@@ -17,7 +17,7 @@ use crate::features::clinical_check::application::check_state::CheckState;
 use crate::features::clinical_check::domain::calculations;
 use crate::features::clinical_check::domain::entities::ClinicalCheck;
 use crate::features::clinical_check::domain::enums::{Destination, Severity};
-use crate::screens::board;
+use crate::features::shared::board;
 
 /// How the screen asks the `BLoC` to do something.
 pub(crate) type Dispatch = Rc<dyn Fn(CheckEvent, &mut Window, &mut App)>;
