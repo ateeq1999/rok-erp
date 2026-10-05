@@ -7,6 +7,7 @@
 //! from.
 
 pub mod batches_and_expiry;
+pub mod board;
 pub mod controlled_register;
 pub mod dashboard;
 pub mod dispensary_till;
