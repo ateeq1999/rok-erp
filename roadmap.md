@@ -114,9 +114,23 @@ presentation -> application -> domain <- data
         window, the figures the screen hands its widgets).
 - [x] The dashboard route is now `frame::page("/").child(features::DashboardPage::new())`, and
       `screens/dashboard.rs` is gone: the page is reachable only through `features::DashboardPage`.
+- [x] `features/prescriptions/`, the same four layers for the queue, whose rules are the status
+      boxes that must add up to the rows, the flagged rows the pharmacist works first, and the
+      one unread photo. `/prescriptions` now frames `features::PrescriptionsPage::new()`, and
+      `screens/prescriptions.rs` is gone.
+- [x] `features/clinical_check/`, the same four layers for the pharmacist's check of one
+      prescription. Its domain holds the rule the board states in a footnote: an alert holds
+      the prescription only until the call that answers it is recorded, so `can_approve` is
+      false for an alert with no recorded outcome. `board::link_to` now sets a debug selector
+      from the element's id, so a widget test can click the link the board named.
+      `screens/prescription_check.rs` is gone and
+      `/prescriptions/:prescription_id/check` frames `features::ClinicalCheckPage::new()`.
 - [ ] Licences and inspection readiness (board already drawn in `screens/licences_and_inspection.rs`,
       to be rebuilt as `features/licences/`).
 - [ ] Reports (board already drawn in `screens/reports.rs`, to be rebuilt as `features/reports/`).
 
 The remaining screens move across one feature at a time, each keeping the board it was drawn
 from as its story data.
+
+A presentation layer still reaches into `screens::board` for its toolkit. That is the one
+cross-feature dependency left; `features/shared/` would take it out.
