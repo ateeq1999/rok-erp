@@ -2,3 +2,6 @@
 /target
 .env
 @AGENTS.md
+
+# Freebuff managed worktrees (tool-owned, never commit)
+.freebuff/worktrees/
