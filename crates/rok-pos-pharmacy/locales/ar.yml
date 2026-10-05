@@ -1,0 +1,109 @@
+# The pharmacy's Arabic strings. Story figures (patient names, medicine
+# names, dates) are data, not copy: they stay with the story until their
+# phase reads them from the database.
+app:
+  pharmacy: الصيدلية
+
+nav:
+  dashboard: الرئيسية
+  prescriptions: الوصفات الطبية
+  patients: المرضى
+  refills: إعادة الصرف المستحقة
+  medicines: الأدوية
+  batches: الدفعات وتواريخ الانتهاء
+  controlled_register: سجل المواد المراقَبة
+  order: طلب الأدوية
+  receive: استلام التوريدات
+  recalls: السحب من السوق
+  claims: مطالبات التأمين
+  licences: التراخيص والتفتيش
+  reports: التقارير
+  till: صندوق الصرف
+  open_till: افتح صندوق الصرف
+  group:
+    dispensary: الصرف
+    medicines_stock: الأدوية والمخزون
+    money_rules: المال والقواعد
+
+frame:
+  synced: تمت المزامنة قبل دقيقتين
+
+language:
+  english: English
+  arabic: العربية
+
+patient:
+  filters:
+    all: كل المرضى
+    refill: إعادة صرف مستحقة
+    insurance: تأمين
+    recent: حديث
+  list:
+    title: المرضى
+    meta: الأحدث تعبئةً أولاً
+    col:
+      patient: المريض
+      phone: الهاتف
+      cover: التغطية
+      conditions: الحالات
+      next_due: الاستحقاق القادم
+    nothing_due: لا شيء مستحق
+    open_record: افتح السجل
+    footnote: السجل هو المكان الوحيد لموافقة المريض وحساسيته وملاحظات الصيدلي.
+    row_hint: الصف والرابط يفتحان السجل معاً؛ والهاتف موجود لاتصاله.
+    stat:
+      on_file: المرضى المسجلون
+      on_file_note: "%{branch} · كل التأمينات"
+      due: إعادة صرف مستحقة خلال 7 أيام
+      due_note: سبب فتح السجل اليوم
+      insured: مشمولون بالتأمين
+      insured_note: والبقية يدفعون عند الطاولة
+    loading:
+      title: يجري فتح القائمة
+      body: كل مرضى الصيدلية، الأكثر إلحاحاً أولاً.
+    failed:
+      title: تعذّرت قراءة القائمة
+    refresh: تحديث
+    refreshing: جارٍ التحديث
+  record:
+    page_title: سجل المريض
+    head_meta: السجل
+    insurance: التأمين الصحي
+    reminders: التذكيرات
+    reminders_on: مُفعّل
+    reminders_off: مُعطّل
+    allergies: الحساسية
+    conditions_title: من الوصفات المسجلة
+    medicines: الأدوية الحالية
+    medicines_meta: كل إعادة صرف مستحقة
+    col:
+      medicine: الدواء
+      last_filled: آخر تعبئة
+      refill_due: إعادة الصرف المستحقة
+      date: التاريخ
+      prescription: الوصفة
+      medicines: الأدوية
+      pharmacist: الصيدلي
+      status: الحالة
+    history: "سجل الصرف · آخر %{count} عمليات"
+    print: اطبع السجل
+    notes: الملاحظات السريرية
+    notes_meta: الملاحظات السريرية للصيادلة فقط
+    add_note: أضف ملاحظة سريرية
+    stat:
+      reminders: تذكيرات إعادة الصرف
+      refills: أدوية لإعادة الصرف
+      refills_note: ما تحتسبه الصيدلية أيامه
+      next: إعادة الصرف القادمة
+      next_note: سبب فتح هذا السجل
+      next_none: لا شيء
+      fills: عمليات الصرف المسجلة
+      fills_note: محفوظة للمدة التي يشترطها المنظّم
+    loading:
+      title: يجري فتح السجل
+      body: أدوية المريض وتاريخه وملاحظاته.
+    failed:
+      title: تعذّر فتح السجل
+
+common:
+  retry: حاول مجدداً

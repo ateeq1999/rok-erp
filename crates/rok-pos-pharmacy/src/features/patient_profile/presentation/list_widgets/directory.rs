@@ -3,6 +3,7 @@
 use gpui::prelude::*;
 use rok_pos_shell::Tone;
 use rok_ui::prelude::*;
+use rust_i18n::t;
 
 use crate::features::patient_profile::domain::entities::Listing;
 use crate::features::patient_profile::domain::enums::Urgency;
@@ -38,27 +39,37 @@ pub(crate) fn card(listings: &[Listing]) -> Div {
                         .next_due
                         .as_ref()
                         .map_or_else(
-                            || board::chip("Nothing due", Tone::Neutral),
+                            || {
+                                board::chip(
+                                    t!("patient.list.nothing_due").to_string(),
+                                    Tone::Neutral,
+                                )
+                            },
                             |due| board::chip(due.to_string(), row_tone(listing)),
                         )
                         .into_any_element(),
                 )
-                .child(board::link(("patient-open", index), href, "Open record"))
+                .child(board::link(
+                    ("patient-open", index),
+                    href,
+                    t!("patient.list.open_record").to_string(),
+                ))
                 .into_any_element()
         })
         .collect::<Vec<_>>();
     board::card(1.)
-        .child(board::card_head("Patients", "Newest refill first"))
+        .child(board::card_head(
+            t!("patient.list.title").to_string(),
+            t!("patient.list.meta").to_string(),
+        ))
         .child(board::head(vec![
-            board::cell("Patient"),
-            board::cell("Phone"),
-            board::cell("Cover"),
-            board::cell("Conditions"),
-            board::cell("Next due"),
+            board::cell(t!("patient.list.col.patient").to_string()),
+            board::cell(t!("patient.list.col.phone").to_string()),
+            board::cell(t!("patient.list.col.cover").to_string()),
+            board::cell(t!("patient.list.col.conditions").to_string()),
+            board::cell(t!("patient.list.col.next_due").to_string()),
             board::cell_fixed(""),
         ]))
         .children(rows)
-        .child(board::footnote(
-            "The row and the link both open the record; the phone is there for the call.",
-        ))
+        .child(board::footnote(t!("patient.list.row_hint").to_string()))
 }

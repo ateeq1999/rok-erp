@@ -3,6 +3,7 @@
 use gpui::prelude::*;
 use rok_pos_shell::Tone;
 use rok_ui::prelude::*;
+use rust_i18n::t;
 
 use crate::features::patient_profile::domain::entities::Patient;
 use crate::features::shared::board;
@@ -11,8 +12,8 @@ use crate::features::shared::board;
 pub(crate) fn card(patient: &Patient) -> Div {
     board::card(1.)
         .child(board::card_head(
-            "Clinical notes",
-            "Only pharmacists see clinical notes",
+            t!("patient.record.notes").to_string(),
+            t!("patient.record.notes_meta").to_string(),
         ))
         .children(
             patient
@@ -35,7 +36,7 @@ pub(crate) fn card(patient: &Patient) -> Div {
         )
         .child(board::actions(vec![
             Button::new("add-note")
-                .label("Add clinical note")
+                .label(t!("patient.record.add_note").to_string())
                 .into_any_element(),
         ]))
 }

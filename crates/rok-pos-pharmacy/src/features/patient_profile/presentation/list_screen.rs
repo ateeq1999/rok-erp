@@ -9,6 +9,7 @@ use std::rc::Rc;
 use gpui::prelude::*;
 use rok_pos_shell::Tone;
 use rok_ui::prelude::*;
+use rust_i18n::t;
 
 use super::list_widgets::directory;
 use super::styles::PATIENT;
@@ -43,24 +44,31 @@ pub(crate) fn board(listings: &[Listing]) -> Board {
     }
 }
 
-/// The filters the list offers, as the board draws them.
-const FILTERS: [(&str, bool); 4] = [
-    ("All patients", true),
-    ("Refill due", false),
-    ("Insurance", false),
-    ("Recent", false),
-];
+/// The filters the list offers, as the board draws them, in the session's
+/// language.
+fn filters() -> [(std::borrow::Cow<'static, str>, bool); 4] {
+    [
+        (t!("patient.filters.all"), true),
+        (t!("patient.filters.refill"), false),
+        (t!("patient.filters.insurance"), false),
+        (t!("patient.filters.recent"), false),
+    ]
+}
 
 /// The list while it is on its way.
 fn loading() -> Div {
     div().sx(board::root()).child(
         div()
             .sx(&PATIENT.notice)
-            .child(div().sx(&PATIENT.notice_title).child("Opening the list"))
+            .child(
+                div()
+                    .sx(&PATIENT.notice_title)
+                    .child(t!("patient.list.loading.title").to_string()),
+            )
             .child(
                 div()
                     .sx(&PATIENT.notice_body)
-                    .child("Every patient the pharmacy serves, most urgent first."),
+                    .child(t!("patient.list.loading.body").to_string()),
             ),
     )
 }
@@ -69,7 +77,7 @@ fn loading() -> Div {
 fn failed(message: &str, dispatch: &Dispatch) -> Div {
     let retry = dispatch.clone();
     let retry_button = Button::new("patient-list-retry")
-        .label("Try again")
+        .label(t!("common.retry").to_string())
         .on_click(move |_, window, cx| retry(ListEvent::Retry, window, cx));
     div().sx(board::root()).child(
         div()
@@ -77,7 +85,7 @@ fn failed(message: &str, dispatch: &Dispatch) -> Div {
             .child(
                 div()
                     .sx(&PATIENT.notice_title)
-                    .child("The list could not be read"),
+                    .child(t!("patient.list.failed.title").to_string()),
             )
             .child(div().sx(&PATIENT.notice_body).child(message.to_string()))
             .child(retry_button),
@@ -89,38 +97,44 @@ fn content(board: &Board, refreshing: bool, dispatch: &Dispatch, cx: &mut Cx) ->
     let mode = board::mode(cx);
     let refresh = dispatch.clone();
     let refresh_button = Button::new("patient-list-refresh")
-        .label(if refreshing { "Refreshing" } else { "Refresh" })
+        .label(if refreshing {
+            t!("patient.list.refreshing").to_string()
+        } else {
+            t!("patient.list.refresh").to_string()
+        })
         .on_click(move |_, window, cx| refresh(ListEvent::Refresh, window, cx));
     div()
         .sx(board::root())
         .child(board::stat_row(vec![
             board::stat(
-                "Patients on file",
+                t!("patient.list.stat.on_file").to_string(),
                 board.listed.to_string(),
-                "Mwenge branch \u{b7} all insurances",
+                t!(
+                    "patient.list.stat.on_file_note",
+                    branch = crate::story::BRANCH
+                )
+                .to_string(),
                 None,
                 mode,
             ),
             board::stat(
-                "Refill due in 7 days",
+                t!("patient.list.stat.due").to_string(),
                 board.due_this_week.to_string(),
-                "the reason to open a record today",
+                t!("patient.list.stat.due_note").to_string(),
                 Some(Tone::Warning),
                 mode,
             ),
             board::stat(
-                "Insurance covered",
+                t!("patient.list.stat.insured").to_string(),
                 board.insured.to_string(),
-                "the rest pay at the counter",
+                t!("patient.list.stat.insured_note").to_string(),
                 Some(Tone::Brand),
                 mode,
             ),
         ]))
-        .child(board::filters_in(mode, &FILTERS))
+        .child(board::filters_in(mode, &filters()))
         .child(directory::card(&board.listings))
-        .child(board::footnote(
-            "A record is the only place a patient's consent, allergies and pharmacist's notes live.",
-        ))
+        .child(board::footnote(t!("patient.list.footnote").to_string()))
         .child(board::actions(vec![refresh_button.into_any_element()]))
 }
 

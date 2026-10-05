@@ -134,6 +134,14 @@ presentation -> application -> domain <- data
       the clinic says so is not a pharmacy refill`), and the board's seven-patient directory.
       `/patients` and `/patients/:patient_id` frame `features::PatientListPage::new()` and
       `features::PatientProfilePage::new()`, and `screens/patient_profile.rs` is gone.
+- [x] The copy is English and Arabic, in `locales/`, read through rust-i18n's `t!`: the sidebar,
+      the top bar and the patient feature speak both. The top bar's language button switches
+      the locale, the text direction (`locale::Language`) and the font; the whole frame lays
+      out inside rok-ui's `Direction`, so rows, tables and the sidebar mirror in Arabic, and
+      the board draws every label through `BidiText`, which puts Arabic's letters in the right
+      order on Windows. Noto Sans Arabic ships beside Outfit and Oxanium, and the boards'
+      numeric columns stay right-aligned in both directions. Features translated so far:
+      the frame and the patient feature; the rest move to `t!` as they are touched.
 - [ ] Licences and inspection readiness (board already drawn in `screens/licences_and_inspection.rs`,
       to be rebuilt as `features/licences/`).
 - [ ] Reports (board already drawn in `screens/reports.rs`, to be rebuilt as `features/reports/`).

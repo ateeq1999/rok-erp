@@ -3,6 +3,7 @@
 
 use rok_pos_shell::{Page, Sidebar};
 use rok_ui::prelude::SharedString;
+use rust_i18n::t;
 
 use crate::{navigation, story};
 
@@ -41,8 +42,16 @@ pub fn titled(heading: impl Into<SharedString>) -> Page {
     framed(heading, false)
 }
 
+/// The record page's heading, in the session's language, for the route that
+/// frames the patient feature.
+#[must_use]
+pub fn record_heading() -> SharedString {
+    t!("patient.record.page_title").to_string().into()
+}
+
 fn framed(heading: impl Into<SharedString>, with_time: bool) -> Page {
     Page::new(heading, story::subheading(with_time))
+        .actions(vec![crate::locale::toggle()])
         .status(story::sync_status())
         .unread(true)
 }

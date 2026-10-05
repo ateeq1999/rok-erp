@@ -126,14 +126,14 @@ pub fn card(grow: f32) -> Div {
 pub fn card_head(title: impl Into<SharedString>, meta: impl Into<SharedString>) -> Div {
     div()
         .sx(&BOARD.card_head)
-        .child(div().sx(&BOARD.card_title).child(title.into()))
-        .child(div().sx(&BOARD.meta).child(meta.into()))
+        .child(div().sx(&BOARD.card_title).child(BidiText::new(title)))
+        .child(div().sx(&BOARD.meta).child(BidiText::new(meta)))
 }
 
 /// A plain heading, for a card whose right-hand side is a control.
 #[must_use]
 pub fn card_title(title: impl Into<SharedString>) -> Div {
-    div().sx(&BOARD.card_title).child(title.into())
+    div().sx(&BOARD.card_title).child(BidiText::new(title))
 }
 
 /// A box that opens `href` on a click, Enter or Space.
@@ -168,7 +168,7 @@ pub fn link_to(id: impl Into<ElementId>, href: impl Into<SharedString>) -> gpui:
 /// The small caps label a board puts above a block: "PRESCRIPTION IMAGE".
 #[must_use]
 pub fn section_label(text: impl Into<SharedString>) -> Div {
-    div().sx(&BOARD.section_label).child(text.into())
+    div().sx(&BOARD.section_label).child(BidiText::new(text))
 }
 
 /// One of the figures across the top of a board: a count, a value and a note.
@@ -183,7 +183,7 @@ pub fn stat(
     let value = value.into();
     div()
         .sx(sx![&BOARD.card, style! { grow: 1 }])
-        .child(div().sx(&BOARD.meta).child(label.into()))
+        .child(div().sx(&BOARD.meta).child(BidiText::new(label)))
         .child(
             div()
                 .sx(&BOARD.stat_value)
@@ -191,9 +191,9 @@ pub fn stat(
                     tone.map(|tone| tone::colors(tone, mode).foreground),
                     gpui::Styled::text_color,
                 )
-                .child(value),
+                .child(BidiText::new(value)),
         )
-        .child(div().sx(&BOARD.stat_note).child(note.into()))
+        .child(div().sx(&BOARD.stat_note).child(BidiText::new(note)))
 }
 
 /// A row of [`stat`]s, as the boards lay their headline figures out.
@@ -263,11 +263,11 @@ pub fn filter(label: impl Into<SharedString>, on: bool, mode: ThemeMode) -> Div 
 /// correct in the mode the board is being drawn in, so the mode is a parameter
 /// rather than read from a context the free functions do not have.
 #[must_use]
-pub fn filters_in(mode: ThemeMode, labels: &[(&'static str, bool)]) -> Div {
+pub fn filters_in<S: AsRef<str>>(mode: ThemeMode, labels: &[(S, bool)]) -> Div {
     div().sx(&BOARD.filters).children(
         labels
             .iter()
-            .map(|(label, on)| filter((*label).to_string(), *on, mode)),
+            .map(|(label, on)| filter(label.as_ref().to_string(), *on, mode)),
     )
 }
 
@@ -290,7 +290,10 @@ pub fn line(cells: Vec<AnyElement>) -> Div {
 /// truncates rather than pushing the row wider.
 #[must_use]
 pub fn cell(text: impl Into<SharedString>) -> AnyElement {
-    div().sx(&BOARD.grow).child(text.into()).into_any_element()
+    div()
+        .sx(&BOARD.grow)
+        .child(BidiText::new(text))
+        .into_any_element()
 }
 
 /// A growing cell whose text is one line that ellipsizes.
@@ -303,14 +306,17 @@ pub fn cell(text: impl Into<SharedString>) -> AnyElement {
 pub fn cell_truncating(text: impl Into<SharedString>) -> AnyElement {
     div()
         .sx(&BOARD.grow_truncate)
-        .child(text.into())
+        .child(BidiText::new(text))
         .into_any_element()
 }
 
 /// A cell of a fixed width, for a date, a status or a short figure.
 #[must_use]
 pub fn cell_fixed(text: impl Into<SharedString>) -> AnyElement {
-    div().sx(&BOARD.fixed).child(text.into()).into_any_element()
+    div()
+        .sx(&BOARD.fixed)
+        .child(BidiText::new(text))
+        .into_any_element()
 }
 
 /// A fixed-width cell holding a two-line stack: a reference and the line under
@@ -326,8 +332,8 @@ pub fn cell_fixed_stack(
         .child(
             div()
                 .sx(&BOARD.cell_stack)
-                .child(div().sx(&BOARD.cell_title).child(title.into()))
-                .child(div().sx(&BOARD.cell_detail).child(detail.into())),
+                .child(div().sx(&BOARD.cell_title).child(BidiText::new(title)))
+                .child(div().sx(&BOARD.cell_detail).child(BidiText::new(detail))),
         )
         .into_any_element()
 }
@@ -346,8 +352,8 @@ pub fn cell_number(text: impl Into<SharedString>) -> AnyElement {
 pub fn cell_stack(title: impl Into<SharedString>, detail: impl Into<SharedString>) -> AnyElement {
     div()
         .sx(&BOARD.cell_stack)
-        .child(div().sx(&BOARD.cell_title).child(title.into()))
-        .child(div().sx(&BOARD.cell_detail).child(detail.into()))
+        .child(div().sx(&BOARD.cell_title).child(BidiText::new(title)))
+        .child(div().sx(&BOARD.cell_detail).child(BidiText::new(detail)))
         .into_any_element()
 }
 
@@ -362,8 +368,8 @@ pub fn chip(label: impl Into<SharedString>, tone: Tone) -> AnyElement {
 pub fn key_value(label: impl Into<SharedString>, value: impl Into<SharedString>) -> Div {
     div()
         .sx(&BOARD.kv)
-        .child(div().sx(&BOARD.kv_label).child(label.into()))
-        .child(div().sx(&BOARD.kv_value).child(value.into()))
+        .child(div().sx(&BOARD.kv_label).child(BidiText::new(label)))
+        .child(div().sx(&BOARD.kv_value).child(BidiText::new(value)))
 }
 
 /// A block that needs attention, filled with `tone` and titled.
@@ -384,9 +390,9 @@ pub fn alert(
             div()
                 .sx(&BOARD.alert_title)
                 .text_color(palette.foreground)
-                .child(title.into()),
+                .child(BidiText::new(title)),
         )
-        .child(div().sx(&BOARD.alert_body).child(body.into()))
+        .child(div().sx(&BOARD.alert_body).child(BidiText::new(body)))
 }
 
 /// The board's buttons along the bottom of a rail.
@@ -404,7 +410,7 @@ pub fn list(children: Vec<AnyElement>) -> Div {
 /// The board's small print: a line under a figure or a table.
 #[must_use]
 pub fn meta(text: impl Into<SharedString>) -> Div {
-    div().sx(&BOARD.meta).child(text.into())
+    div().sx(&BOARD.meta).child(BidiText::new(text))
 }
 
 /// A row of chips, which the boards put under a status or beside a figure.
@@ -416,7 +422,7 @@ pub fn chip_line(chips: Vec<AnyElement>) -> Div {
 /// A quiet box of text, as the boards set an option or a label in.
 #[must_use]
 pub fn option(label: impl Into<SharedString>) -> Div {
-    div().sx(&BOARD.filter).child(label.into())
+    div().sx(&BOARD.filter).child(BidiText::new(label))
 }
 
 /// A row filled with `tone`'s background, as "Today's queue by status" draws

@@ -14,6 +14,7 @@ use crate::features::patient_profile::application::record_state::RecordState;
 use crate::features::patient_profile::domain::calculations;
 use crate::features::patient_profile::domain::entities::Patient;
 use crate::features::shared::board;
+use rust_i18n::t;
 
 /// Every figure the record's widgets draw, already resolved.
 pub(crate) struct Board {
@@ -42,11 +43,15 @@ fn loading() -> Div {
     div().sx(board::root()).child(
         div()
             .sx(&PATIENT.notice)
-            .child(div().sx(&PATIENT.notice_title).child("Opening the record"))
+            .child(
+                div()
+                    .sx(&PATIENT.notice_title)
+                    .child(t!("patient.record.loading.title").to_string()),
+            )
             .child(
                 div()
                     .sx(&PATIENT.notice_body)
-                    .child("The patient's medicines, history and notes."),
+                    .child(t!("patient.record.loading.body").to_string()),
             ),
     )
 }
@@ -59,7 +64,7 @@ fn failed(message: &str) -> Div {
             .child(
                 div()
                     .sx(&PATIENT.notice_title)
-                    .child("The record could not be opened"),
+                    .child(t!("patient.record.failed.title").to_string()),
             )
             .child(div().sx(&PATIENT.notice_body).child(message.to_string())),
     )
@@ -86,35 +91,37 @@ fn content(board: &Board, cx: &mut Cx) -> Div {
         )
         .child(board::stat_row(vec![
             board::stat(
-                "Refill reminders",
+                t!("patient.record.stat.reminders").to_string(),
                 if patient.wants_reminders() {
-                    "On"
+                    t!("patient.record.reminders_on").to_string()
                 } else {
-                    "Off"
-                }
-                .to_string(),
+                    t!("patient.record.reminders_off").to_string()
+                },
                 patient.consent.to_string(),
                 Some(Tone::Brand),
                 mode,
             ),
             board::stat(
-                "Medicines to refill",
+                t!("patient.record.stat.refills").to_string(),
                 board.refills_due.to_string(),
-                "the ones the pharmacy counts the days for",
+                t!("patient.record.stat.refills_note").to_string(),
                 Some(Tone::Warning),
                 mode,
             ),
             board::stat(
-                "Next refill due",
-                board.next_due.clone().unwrap_or_else(|| "None".to_string()),
-                "the reason this record was opened",
+                t!("patient.record.stat.next").to_string(),
+                board
+                    .next_due
+                    .clone()
+                    .unwrap_or_else(|| t!("patient.record.stat.next_none").to_string()),
+                t!("patient.record.stat.next_note").to_string(),
                 Some(Tone::Warning),
                 mode,
             ),
             board::stat(
-                "Fills on record",
+                t!("patient.record.stat.fills").to_string(),
                 board.fills.to_string(),
-                "kept for the period the regulator requires",
+                t!("patient.record.stat.fills_note").to_string(),
                 None,
                 mode,
             ),

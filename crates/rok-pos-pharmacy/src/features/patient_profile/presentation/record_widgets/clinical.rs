@@ -3,6 +3,7 @@
 use gpui::prelude::*;
 use rok_pos_shell::Tone;
 use rok_ui::prelude::*;
+use rust_i18n::t;
 
 use crate::features::patient_profile::domain::entities::Patient;
 use crate::features::shared::board;
@@ -16,7 +17,9 @@ pub(crate) fn card(patient: &Patient) -> Div {
         ))
         .child(board::chip(patient.allergies.to_string(), Tone::Success))
         .child(board::footnote(patient.allergy_source.to_string()))
-        .child(board::card_title("From prescriptions on file"))
+        .child(board::card_title(
+            t!("patient.record.conditions_title").to_string(),
+        ))
         .child(board::list(
             patient
                 .conditions

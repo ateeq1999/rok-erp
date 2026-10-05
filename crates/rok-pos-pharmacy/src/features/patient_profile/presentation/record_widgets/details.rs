@@ -3,6 +3,7 @@
 use gpui::prelude::*;
 use rok_pos_shell::Tone;
 use rok_ui::prelude::*;
+use rust_i18n::t;
 
 use crate::features::patient_profile::domain::entities::Patient;
 use crate::features::shared::board;
@@ -12,7 +13,7 @@ pub(crate) fn card(patient: &Patient) -> Div {
     board::card(1.)
         .child(board::card_head(
             board::dotted(&[&patient.initials, &patient.name]),
-            "Record",
+            t!("patient.record.head_meta").to_string(),
         ))
         .child(board::panel(
             patient
@@ -24,15 +25,19 @@ pub(crate) fn card(patient: &Patient) -> Div {
                 })
                 .collect::<Vec<_>>(),
         ))
-        .child(board::card_title("Health insurance"))
+        .child(board::card_title(
+            t!("patient.record.insurance").to_string(),
+        ))
         .child(board::meta(patient.insurer.to_string()))
         .child(board::chip(patient.cover.to_string(), Tone::Success))
-        .child(board::card_title("Reminders"))
+        .child(board::card_title(
+            t!("patient.record.reminders").to_string(),
+        ))
         .child(board::chip(
             if patient.wants_reminders() {
-                "On"
+                t!("patient.record.reminders_on").to_string()
             } else {
-                "Off"
+                t!("patient.record.reminders_off").to_string()
             },
             Tone::Brand,
         ))

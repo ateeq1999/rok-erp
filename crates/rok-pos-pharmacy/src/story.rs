@@ -6,6 +6,7 @@
 //! value says which phase replaces it; when that phase lands, the value goes.
 
 use rok_pos_shell::{Tone, TopBarStatus, UserChip};
+use rust_i18n::t;
 
 use crate::navigation::SidebarCounts;
 
@@ -45,7 +46,7 @@ pub const fn sidebar_counts() -> SidebarCounts {
 /// The sync chip in the top bar. Phase 15 (branch sync) replaces it.
 #[must_use]
 pub fn sync_status() -> TopBarStatus {
-    TopBarStatus::new("Synced 2 min ago", Tone::Success)
+    TopBarStatus::new(t!("frame.synced").to_string(), Tone::Success)
 }
 
 /// The line under a page's heading: the business and branch, and on the

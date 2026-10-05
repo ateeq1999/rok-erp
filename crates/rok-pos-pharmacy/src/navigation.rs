@@ -8,6 +8,7 @@
 //! the paths below it. The till is not a row: it is the big button above them.
 
 use rok_pos_shell::{NavGroup, NavItem, SidebarAction, Tone};
+use rust_i18n::t;
 
 /// One screen: what the sidebar calls it, where it opens, and who may open it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -119,6 +120,41 @@ pub const ITEMS: [Screen; 14] = [
 /// Where the till opens.
 pub const TILL: &str = "/till";
 
+/// What the sidebar calls a screen, in the session's language. The screen's
+/// own label is the fallback, so a screen a locale has not met yet still
+/// reads.
+fn nav_label(screen: &Screen) -> String {
+    let key = match screen.href {
+        "/" => "nav.dashboard",
+        "/prescriptions" => "nav.prescriptions",
+        "/patients" => "nav.patients",
+        "/refills" => "nav.refills",
+        "/medicines" => "nav.medicines",
+        "/batches" => "nav.batches",
+        "/controlled-register" => "nav.controlled_register",
+        "/order" => "nav.order",
+        "/receive" => "nav.receive",
+        "/recalls" => "nav.recalls",
+        "/claims" => "nav.claims",
+        "/licences" => "nav.licences",
+        "/reports" => "nav.reports",
+        TILL => "nav.till",
+        _ => return screen.label.to_string(),
+    };
+    t!(key).to_string()
+}
+
+/// What the sidebar calls a group, in the session's language.
+fn group_label(label: &str) -> String {
+    let key = match label {
+        "Dispensary" => "nav.group.dispensary",
+        "Medicines & stock" => "nav.group.medicines_stock",
+        "Money & rules" => "nav.group.money_rules",
+        _ => return label.to_string(),
+    };
+    t!(key).to_string()
+}
+
 /// The sidebar's groups, in order: the heading, then each screen's path.
 const GROUPS: [(&str, &[&str]); 3] = [
     (
@@ -191,7 +227,7 @@ pub fn groups(can: &dyn Fn(&str) -> bool, counts: &SidebarCounts) -> Vec<NavGrou
                 .iter()
                 .filter_map(|href| item(href, can, counts))
                 .collect::<Vec<NavItem>>();
-            (!items.is_empty()).then(|| NavGroup::new(*label, items))
+            (!items.is_empty()).then(|| NavGroup::new(group_label(label), items))
         })
         .collect()
 }
@@ -210,7 +246,7 @@ pub fn item(href: &str, can: &dyn Fn(&str) -> bool, counts: &SidebarCounts) -> O
     find(href)
         .filter(|screen| screen.permission.is_none_or(can))
         .map(|screen| {
-            let row = NavItem::new(screen.label)
+            let row = NavItem::new(nav_label(screen))
                 .href(screen.href)
                 .exact(screen.exact);
             match counts.badge(screen.href) {
@@ -225,10 +261,10 @@ pub fn item(href: &str, can: &dyn Fn(&str) -> bool, counts: &SidebarCounts) -> O
 pub fn till_action(can: &dyn Fn(&str) -> bool) -> Option<SidebarAction> {
     find(TILL)
         .filter(|screen| screen.permission.is_none_or(can))
-        .map(|_| SidebarAction::new("Open dispensary till", TILL))
+        .map(|_| SidebarAction::new(t!("nav.open_till").to_string(), TILL))
 }
 
-/// A screen's label, for its top bar.
+/// A screen's label, for its top bar, in the session's language.
 ///
 /// ```
 /// # use rok_pos_pharmacy::navigation;
@@ -236,8 +272,8 @@ pub fn till_action(can: &dyn Fn(&str) -> bool) -> Option<SidebarAction> {
 /// assert_eq!(navigation::label("/nowhere"), "Pharmacy");
 /// ```
 #[must_use]
-pub fn label(href: &str) -> &'static str {
-    find(href).map_or("Pharmacy", |screen| screen.label)
+pub fn label(href: &str) -> String {
+    find(href).map_or_else(|| t!("app.pharmacy").to_string(), nav_label)
 }
 
 fn find(href: &str) -> Option<&'static Screen> {
@@ -246,8 +282,9 @@ fn find(href: &str) -> Option<&'static Screen> {
 
 #[cfg(test)]
 mod tests {
-    use super::{GROUPS, ITEMS, SidebarCounts, TILL, groups, item, label, till_action};
+    use super::{GROUPS, ITEMS, SidebarCounts, TILL, groups, item, label, nav_label, till_action};
     use rok_pos_shell::Tone;
+    use rust_i18n::t;
     use std::collections::HashSet;
     use std::path::Path;
 
@@ -276,6 +313,11 @@ mod tests {
 
     #[test]
     fn the_groups_and_rows_are_the_boards() {
+        // The expected labels come from the same translation keys the code
+        // reads, so the test holds in either language.
+        let rows = |keys: &[&str]| -> Vec<String> {
+            keys.iter().map(|key| t!(*key).to_string()).collect()
+        };
         let drawn: Vec<(String, Vec<String>)> = groups(&ALL, &SidebarCounts::default())
             .iter()
             .map(|group| {
@@ -293,32 +335,28 @@ mod tests {
             drawn,
             [
                 (
-                    "Dispensary".to_string(),
-                    vec!["Dashboard", "Prescriptions", "Patients", "Refills due"]
-                        .into_iter()
-                        .map(String::from)
-                        .collect::<Vec<_>>()
+                    t!("nav.group.dispensary").to_string(),
+                    rows(&[
+                        "nav.dashboard",
+                        "nav.prescriptions",
+                        "nav.patients",
+                        "nav.refills"
+                    ])
                 ),
                 (
-                    "Medicines & stock".to_string(),
-                    [
-                        "Medicines",
-                        "Batches & expiry",
-                        "Controlled register",
-                        "Order medicines",
-                        "Receive deliveries",
-                        "Recalls"
-                    ]
-                    .into_iter()
-                    .map(String::from)
-                    .collect()
+                    t!("nav.group.medicines_stock").to_string(),
+                    rows(&[
+                        "nav.medicines",
+                        "nav.batches",
+                        "nav.controlled_register",
+                        "nav.order",
+                        "nav.receive",
+                        "nav.recalls"
+                    ])
                 ),
                 (
-                    "Money & rules".to_string(),
-                    ["Insurance claims", "Licences & inspection", "Reports"]
-                        .into_iter()
-                        .map(String::from)
-                        .collect()
+                    t!("nav.group.money_rules").to_string(),
+                    rows(&["nav.claims", "nav.licences", "nav.reports"])
                 ),
             ]
         );
@@ -398,9 +436,9 @@ mod tests {
 
     #[test]
     fn every_screen_has_its_label() {
-        assert_eq!(label("/nowhere"), "Pharmacy");
-        for screen in ITEMS {
-            assert_eq!(label(screen.href), screen.label);
+        assert_eq!(label("/nowhere"), t!("app.pharmacy").to_string());
+        for screen in &ITEMS {
+            assert_eq!(label(screen.href), nav_label(screen));
         }
     }
 }

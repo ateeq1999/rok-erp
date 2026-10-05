@@ -3,6 +3,7 @@
 use gpui::prelude::*;
 use rok_pos_shell::Tone;
 use rok_ui::prelude::*;
+use rust_i18n::t;
 
 use crate::features::patient_profile::domain::entities::Patient;
 use crate::features::shared::board;
@@ -31,11 +32,14 @@ pub(crate) fn card(patient: &Patient) -> Div {
         })
         .collect::<Vec<_>>();
     board::card(2.2)
-        .child(board::card_head("Current medicines", "All refills due"))
+        .child(board::card_head(
+            t!("patient.record.medicines").to_string(),
+            t!("patient.record.medicines_meta").to_string(),
+        ))
         .child(board::head(vec![
-            board::cell_fixed("Medicine"),
-            board::cell_fixed("Last filled"),
-            board::cell_fixed("Refill due"),
+            board::cell_fixed(t!("patient.record.col.medicine").to_string()),
+            board::cell_fixed(t!("patient.record.col.last_filled").to_string()),
+            board::cell_fixed(t!("patient.record.col.refill_due").to_string()),
         ]))
         .children(rows)
 }

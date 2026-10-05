@@ -11,5 +11,5 @@ file_route! { component: PatientPage }
 /// board's patient, as the check route opens the board's prescription.
 #[component]
 fn PatientPage() -> impl IntoElement {
-    frame::titled("Patient record").child(features::PatientProfilePage::new())
+    frame::titled(frame::record_heading()).child(features::PatientProfilePage::new())
 }
