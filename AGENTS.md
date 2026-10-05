@@ -16,6 +16,7 @@ Start here:
 | Code style, docs and tests            | `.agents/skills/style/SKILL.md`     |
 | Change or add a proc macro            | `.agents/skills/macro/SKILL.md`     |
 | Add or change a component             | `.agents/skills/component/SKILL.md` |
+| Add or change a pharmacy feature      | `.agents/skills/feature/SKILL.md`   |
 | Add routes or change the router       | `.agents/skills/route/SKILL.md`     |
 | Use rok-db or change the `db` feature | `.agents/skills/db/SKILL.md`        |
 | Review a change for code quality      | `.agents/skills/quality/SKILL.md`   |
