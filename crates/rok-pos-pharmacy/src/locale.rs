@@ -153,10 +153,89 @@ pub fn toggle() -> AnyElement {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeSet;
+
     use super::Language;
     use rok_ui::components::direction::{self, TextDirection};
     use rok_ui::prelude::*;
     use rust_i18n::t;
+
+    /// Every key `en.yml` declares, read from the crate's own `locales`
+    /// directory, so this test cannot lie about the file it checks.
+    fn english_keys() -> BTreeSet<String> {
+        locale_keys(concat!(env!("CARGO_MANIFEST_DIR"), "/locales/en.yml"))
+    }
+
+    /// The key set of a two-space-indented locale file. Fails loudly on
+    /// anything else, so a format change cannot silently hollow the parity
+    /// test out.
+    fn locale_keys(path: &str) -> BTreeSet<String> {
+        let source =
+            std::fs::read_to_string(path).unwrap_or_else(|error| panic!("read {path}: {error}"));
+        let mut keys = BTreeSet::new();
+        let mut branch: Vec<&str> = Vec::new();
+        for line in source.lines() {
+            if line.is_empty() || line.starts_with('#') {
+                continue;
+            }
+            let indent = line.len() - line.trim_start().len();
+            assert!(
+                indent % 2 == 0,
+                "{path}: odd indentation, the locale files use two spaces\n    {line}"
+            );
+            let depth = indent / 2;
+            branch.truncate(depth);
+            let rest = line.trim_start();
+            if rest == "---" {
+                continue;
+            }
+            assert!(
+                !rest.starts_with("- "),
+                "{path}: lists are not locale keys\n    {line}"
+            );
+            let (name, value) = rest
+                .split_once(':')
+                .unwrap_or_else(|| panic!("{path}: not a `key: value` line\n    {line}"));
+            let name = name.trim();
+            assert!(
+                !name.is_empty(),
+                "{path}: a key is missing its name\n    {line}"
+            );
+            let value = value.trim();
+            branch.push(name);
+            if value.is_empty() {
+                // A nested mapping: the key continues on the deeper lines.
+                continue;
+            }
+            keys.insert(branch.join("."));
+        }
+        assert!(
+            !keys.is_empty(),
+            "{path}: no keys were read; the format changed"
+        );
+        keys
+    }
+
+    /// A key present in English but not Arabic would fall back to English in
+    /// the middle of an Arabic screen; a key present in Arabic but not
+    /// English would break the same way when the fallback locale speaks. Both
+    /// files must therefore declare the same keys.
+    #[test]
+    fn english_and_arabic_declare_the_same_keys() {
+        let english = english_keys();
+        let arabic = locale_keys(concat!(env!("CARGO_MANIFEST_DIR"), "/locales/ar.yml"));
+        let missing_from_arabic: Vec<_> = english.difference(&arabic).collect();
+        assert!(
+            missing_from_arabic.is_empty(),
+            "ar.yml is missing keys that en.yml declares (they would fall back to English): {missing_from_arabic:?}"
+        );
+        let missing_from_english: Vec<_> = arabic.difference(&english).collect();
+        assert!(
+            missing_from_english.is_empty(),
+            "en.yml is missing keys that ar.yml declares: {missing_from_english:?}"
+        );
+        assert!(!english.is_empty());
+    }
 
     #[test]
     fn arabic_and_english_say_the_same_things_in_both_languages() {
