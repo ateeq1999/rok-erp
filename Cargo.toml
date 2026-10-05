@@ -10,7 +10,7 @@ license = "MIT"
 
 [workspace.dependencies]
 gpui = "0.2.2"
-rok-ui = { version = "0.7.0", features = ["full", "query", "router", "db", "db-chrono", "db-uuid"] }
+rok-ui = { version = "0.7.0", features = ["full", "query", "router", "db", "db-chrono", "db-uuid", "font-noto-sans-arabic"] }
 rok-db = { version = "0.3", features = ["chrono", "uuid", "json", "serde", "testing"] }
 serde_json = "1"
 sha2 = "0.10"
@@ -24,6 +24,7 @@ rok-pos-database = { path = "crates/rok-pos-database" }
 rok-pos-hardware = { path = "crates/rok-pos-hardware" }
 rok-pos-pharmacy = { path = "crates/rok-pos-pharmacy" }
 rok-ui-build = "0.7.0"
+rust-i18n = "3"
 uuid = { version = "1", features = ["v7"] }
 chrono = "0.4"
 thiserror = "2"

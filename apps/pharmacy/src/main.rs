@@ -107,6 +107,10 @@ fn main() {
         .run(|cx: &mut App| {
             rok_ui::init(cx);
             rok_pos_shell::fonts::install(cx).expect("the bundled fonts load");
+            // Arabic draws with Noto Sans Arabic; English keeps Outfit.
+            rok_ui::fonts::NOTO_SANS_ARABIC
+                .register(cx)
+                .expect("the Arabic font loads");
             rok_pos_shell::theme::install_theme(cx);
             let bounds = Bounds::centered(None, gpui::size(WINDOW_WIDTH, WINDOW_HEIGHT), cx);
             cx.open_window(

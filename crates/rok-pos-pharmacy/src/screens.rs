@@ -7,17 +7,14 @@
 //! from.
 
 pub mod batches_and_expiry;
+pub mod board;
 pub mod controlled_register;
-pub mod dashboard;
 pub mod dispensary_till;
 pub mod insurance_claims;
 pub mod licences_and_inspection;
 pub mod medicines;
 pub mod order_medicines;
-pub mod patient_profile;
 pub mod placeholder;
-pub mod prescription_check;
-pub mod prescriptions;
 pub mod recalls;
 pub mod receive_delivery;
 pub mod refills;

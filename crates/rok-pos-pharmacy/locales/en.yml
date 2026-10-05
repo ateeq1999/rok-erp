@@ -1,0 +1,109 @@
+# The pharmacy's English strings. Story figures (patient names, medicine
+# names, dates) are data, not copy: they stay with the story until their
+# phase reads them from the database.
+app:
+  pharmacy: Pharmacy
+
+nav:
+  dashboard: Dashboard
+  prescriptions: Prescriptions
+  patients: Patients
+  refills: Refills due
+  medicines: Medicines
+  batches: Batches & expiry
+  controlled_register: Controlled register
+  order: Order medicines
+  receive: Receive deliveries
+  recalls: Recalls
+  claims: Insurance claims
+  licences: Licences & inspection
+  reports: Reports
+  till: Dispensary till
+  open_till: Open dispensary till
+  group:
+    dispensary: Dispensary
+    medicines_stock: Medicines & stock
+    money_rules: Money & rules
+
+frame:
+  synced: Synced 2 min ago
+
+language:
+  english: English
+  arabic: العربية
+
+patient:
+  filters:
+    all: All patients
+    refill: Refill due
+    insurance: Insurance
+    recent: Recent
+  list:
+    title: Patients
+    meta: Newest refill first
+    col:
+      patient: Patient
+      phone: Phone
+      cover: Cover
+      conditions: Conditions
+      next_due: Next due
+    nothing_due: Nothing due
+    open_record: Open record
+    footnote: A record is the only place a patient's consent, allergies and pharmacist's notes live.
+    row_hint: The row and the link both open the record; the phone is there for the call.
+    stat:
+      on_file: Patients on file
+      on_file_note: "%{branch} · all insurances"
+      due: Refill due in 7 days
+      due_note: the reason to open a record today
+      insured: Insurance covered
+      insured_note: the rest pay at the counter
+    loading:
+      title: Opening the list
+      body: Every patient the pharmacy serves, most urgent first.
+    failed:
+      title: The list could not be read
+    refresh: Refresh
+    refreshing: Refreshing
+  record:
+    page_title: Patient record
+    head_meta: Record
+    insurance: Health insurance
+    reminders: Reminders
+    reminders_on: "On"
+    reminders_off: "Off"
+    allergies: Allergies
+    conditions_title: From prescriptions on file
+    medicines: Current medicines
+    medicines_meta: All refills due
+    col:
+      medicine: Medicine
+      last_filled: Last filled
+      refill_due: Refill due
+      date: Date
+      prescription: Prescription
+      medicines: Medicines
+      pharmacist: Pharmacist
+      status: Status
+    history: "Dispensing history · last %{count} fills"
+    print: Print history
+    notes: Clinical notes
+    notes_meta: Only pharmacists see clinical notes
+    add_note: Add clinical note
+    stat:
+      reminders: Refill reminders
+      refills: Medicines to refill
+      refills_note: the ones the pharmacy counts the days for
+      next: Next refill due
+      next_note: the reason this record was opened
+      next_none: None
+      fills: Fills on record
+      fills_note: kept for the period the regulator requires
+    loading:
+      title: Opening the record
+      body: The patient's medicines, history and notes.
+    failed:
+      title: The record could not be opened
+
+common:
+  retry: Try again

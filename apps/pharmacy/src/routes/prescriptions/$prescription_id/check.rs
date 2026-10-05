@@ -3,14 +3,12 @@
 
 use rok_ui::prelude::*;
 use rok_ui::router::file_route;
-use rok_pos_pharmacy::{frame, screens};
+use rok_pos_pharmacy::{features, frame};
 
 file_route! { component: CheckPage }
 
-/// The clinical check page, for the prescription in the route.
+/// The clinical check page: the route only frames the feature's page.
 #[component]
-fn CheckPage(cx: &mut App) -> impl IntoElement {
-    let route = params(cx);
-    frame::titled("Clinical check")
-        .child(screens::prescription_check::view(&route.prescription_id))
-}
+fn CheckPage() -> impl IntoElement {
+    frame::titled("Clinical check").child(features::ClinicalCheckPage::new())
+}

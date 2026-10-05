@@ -2,14 +2,14 @@
 
 use rok_ui::prelude::*;
 use rok_ui::router::file_route;
-use rok_pos_pharmacy::{frame, screens};
+use rok_pos_pharmacy::{features, frame};
 
 file_route! { component: PatientPage }
 
-/// The patient record page, for the patient in the route.
+/// The patient record page: the route only frames the feature's page. The
+/// record follows the route's id in Phase 3; until then every id opens the
+/// board's patient, as the check route opens the board's prescription.
 #[component]
-fn PatientPage(cx: &mut App) -> impl IntoElement {
-    let route = params(cx);
-    frame::titled("Patient record")
-        .child(screens::patient_profile::record(&route.patient_id))
+fn PatientPage() -> impl IntoElement {
+    frame::titled(frame::record_heading()).child(features::PatientProfilePage::new())
 }
