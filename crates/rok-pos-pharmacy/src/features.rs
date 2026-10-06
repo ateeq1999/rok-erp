@@ -14,6 +14,7 @@ pub mod dashboard;
 pub mod licences;
 pub mod patient_profile;
 pub mod prescriptions;
+pub mod reports;
 pub mod shared;
 
 pub use clinical_check::ClinicalCheckPage;
@@ -22,6 +23,7 @@ pub use licences::LicencesPage;
 pub use patient_profile::PatientListPage;
 pub use patient_profile::PatientProfilePage;
 pub use prescriptions::PrescriptionsPage;
+pub use reports::ReportsPage;
 
 #[cfg(test)]
 mod boundary_tests {

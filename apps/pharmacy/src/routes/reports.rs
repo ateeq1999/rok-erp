@@ -3,12 +3,12 @@
 
 use rok_ui::prelude::*;
 use rok_ui::router::file_route;
-use rok_pos_pharmacy::{frame, screens};
+use rok_pos_pharmacy::{features, frame};
 
 file_route! { component: ReportsPage }
 
 /// The reports page.
 #[component]
 fn ReportsPage() -> impl IntoElement {
-    frame::page("/reports").child(screens::reports::view())
+    frame::page("/reports").child(features::ReportsPage::new())
 }

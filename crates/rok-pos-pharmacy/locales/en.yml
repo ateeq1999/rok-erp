@@ -163,5 +163,38 @@ licence:
     missing_note: the folder is what the inspector reads
   footnote: "Nothing on this screen is a substitute for the paper: it is the list of what the folder has to contain."
 
+reports:
+  col:
+    row: Row
+    detail: Detail
+    value: Value
+    share: Share
+  export: Export CSV
+  print: Print
+  loading:
+    title: Opening the reports
+    body: What sold, what it left, what it lost, and what is still owed.
+  failed:
+    title: The reports could not be read
+  period:
+    month: This month
+    last_month: Last month
+    quarter: This quarter
+  branch:
+    both: Both branches
+    mwenge: Mwenge
+    tegeta: Tegeta
+  stat:
+    sales: Sales
+    margin: Margin
+    margin_note: after the cost of the batch sold
+    expiry: Expiry loss
+    expiry_note: written off and about to be
+    claims: Queried claims
+    claims_note: waiting on the insurer
+    controlled: Controlled
+    controlled_note: sold against the register
+  footnote: "%{period} · %{branch} · every figure is a sum of the rows above it."
+
 common:
   retry: Try again

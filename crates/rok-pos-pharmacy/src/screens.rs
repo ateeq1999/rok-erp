@@ -17,4 +17,3 @@ pub mod placeholder;
 pub mod recalls;
 pub mod receive_delivery;
 pub mod refills;
-pub mod reports;

@@ -148,7 +148,11 @@ presentation -> application -> domain <- data
       enum, and the gap the board leads with - the licence itself is on file while the renewal
       application is not. `/licences` frames `features::LicencesPage::new()`, and
       `screens/licences_and_inspection.rs` is gone. The copy is English and Arabic.
-- [ ] Reports (board already drawn in `screens/reports.rs`, to be rebuilt as `features/reports/`).
+- [x] `features/reports/`, the same four layers for the owner's reports: the board's rule that
+      a heading is a sum of its own rows (`adds_up`), the stat row resolved through a `Kind`
+      enum rather than a position in a list, and an unknown report drawn as `Kind::Unknown`
+      rather than dropped. `/reports` frames `features::ReportsPage::new()`, and
+      `screens/reports.rs` is gone. The copy is English and Arabic.
 
 The remaining screens move across one feature at a time, each keeping the board it was drawn
 from as its story data.

@@ -163,5 +163,38 @@ licence:
     missing_note: المجلد هو ما يقرأه المفتش
   footnote: "لا شيء في هذه الشاشة يعوض الورق: إنها قائمة ما يجب أن يحويه المجلد."
 
+reports:
+  col:
+    row: الصف
+    detail: التفصيل
+    value: القيمة
+    share: النسبة
+  export: تصدير CSV
+  print: طباعة
+  loading:
+    title: يجري فتح التقارير
+    body: ما بيع، وما تبقى منه، وما ضاع، وما لا يزال مستحقاً.
+  failed:
+    title: تعذّرت قراءة التقارير
+  period:
+    month: هذا الشهر
+    last_month: الشهر الماضي
+    quarter: هذا الربع
+  branch:
+    both: الفرعان
+    mwenge: موينجي
+    tegeta: تيجيتا
+  stat:
+    sales: المبيعات
+    margin: الهامش
+    margin_note: بعد تكلفة الدفعة التي بيعت
+    expiry: خسارة الانتهاء
+    expiry_note: ما ضاع وما يوشك أن يضيع
+    claims: المطالبات المستفسرة
+    claims_note: في انتظار شركة التأمين
+    controlled: المراقَبة
+    controlled_note: ما بيع مقابل السجل
+  footnote: "%{period} · %{branch} · كل رقم هو مجموع الصفوف التي قبله."
+
 common:
   retry: حاول مجدداً
